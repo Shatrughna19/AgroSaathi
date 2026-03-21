@@ -1,0 +1,194 @@
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-background {
+  flex-grow: 1;
+  background-color: #fbf9f6;
+  padding-bottom: 3rem;
+}
+
+/* Header */
+.agro-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 1rem 0;
+}
+
+.brand-title {
+  color: #2b4b29;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.logo-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background-color: #edf2ea;
+  color: #388e3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Cards */
+.auth-card,
+.home-card,
+.profile-card,
+.crop-card {
+  background: #ffffff;
+  border: 1px solid #e0dfdb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Fix Header Visibility */
+.agro-header .btn-outline-light {
+  color: #388e3c;
+  border-color: #388e3c;
+}
+
+.agro-header .btn-outline-light:hover,
+.agro-header .btn-outline-light.active {
+  background-color: #388e3c;
+  color: #ffffff;
+}
+
+.agro-header .text-light {
+  color: #666 !important;
+}
+
+/* Inputs & Buttons */
+.agro-input {
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  background-color: #fafafa;
+}
+
+.agro-input:focus {
+  border-color: #388e3c;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.15);
+  outline: none;
+}
+
+.agro-btn {
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-success {
+  background-color: #388e3c;
+  border-color: #388e3c;
+  color: #fff;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+  background-color: #2d7330;
+  border-color: #2d7330;
+}
+
+.btn-success:disabled {
+  background-color: #8bcc8e;
+  border-color: #8bcc8e;
+}
+
+.btn-outline-success {
+  color: #388e3c;
+  border-color: #388e3c;
+  background-color: transparent;
+}
+
+.btn-outline-success:hover,
+.btn-outline-success:focus {
+  background-color: #f1f8f1;
+  color: #388e3c;
+}
+
+.btn-outline-danger {
+  color: #d32f2f;
+  border-color: #d32f2f;
+  background-color: transparent;
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+  background-color: #fde8e8;
+  color: #d32f2f;
+}
+
+.btn-warning {
+  background-color: #f0c14b;
+  border-color: #a88734;
+  color: #111;
+}
+
+.btn-warning:hover {
+  background-color: #e2b43b;
+}
+
+.text-success {
+  color: #388e3c !important;
+}
+
+/* Specific elements */
+.profile-details span {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.profile-details .fw-medium {
+  color: #222;
+  margin-top: 0.25rem;
+}
+
+.border-bottom {
+  border-color: #f1f1f1 !important;
+}
+
+.info-banner {
+  background-color: #fffbf0;
+  border: 1px solid #f0e6cc;
+  color: #6b5c35;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.crop-card {
+  padding: 1.5rem;
+}
+
+.crop-card-rice {
+  border-top: 4px solid #4caf50;
+}
+
+.crop-card-cashew {
+  border-top: 4px solid #8d6e63;
+}
+
+.crop-card-mango {
+  border-top: 4px solid #ffca28;
+}

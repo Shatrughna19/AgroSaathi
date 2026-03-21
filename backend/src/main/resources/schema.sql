@@ -1,0 +1,6 @@
+-- MySQL setup reference (optional)
+-- The JDBC URL uses createDatabaseIfNotExist=true to auto-create login_db.
+-- Hibernate (ddl-auto=update) creates the users table from the User entity.
+--
+-- Manual setup (if needed):
+-- CREATE DATABASE IF NOT EXISTS login_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
