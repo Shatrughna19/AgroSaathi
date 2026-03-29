@@ -254,20 +254,17 @@ Please read `CONTRIBUTING.md` for coding standards and commit conventions.
 
 ---
 
-## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
----
+
 
 ## 📬 Contact
 
 Have a question or want to collaborate?
 
-- 📧 Email: your-email@example.com
-- 🐙 GitHub: [@your-username](https://github.com/your-username)
-- 🌐 Project Link: [github.com/your-username/agro-saathi](https://github.com/your-username/agro-saathi)
-
+- 📧 Email: naikshatrughna12@gmail.com
+- 🐙 GitHub: github.com/Shatrughna19
+- 🌐 Project Link: https://github.com/Shatrughna19/AgroSaathi.git
 ---
 
 <div align="center">
