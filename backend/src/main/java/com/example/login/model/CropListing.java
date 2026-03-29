@@ -1,9 +1,9 @@
 package com.example.login.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,6 +18,8 @@ public class CropListing {
     private String cropName;
     private String quantity;
     private Double pricePerUnit;
+    private String imageUrl;
+    private String season;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Long getId() {
@@ -74,5 +76,21 @@ public class CropListing {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getSeason() {
+        return season;
+    }
+
+    public void setSeason(String season) {
+        this.season = season;
     }
 }

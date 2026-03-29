@@ -24,20 +24,36 @@ function Login({ onBackToRegister, onLoginSuccess }) {
       return
     }
 
+    if (formData.aadharno.length !== 12) {
+      setStatus({ type: 'error', message: 'Aadhar number must be exactly 12 digits.' })
+      return
+    }
+
     setLoading(true)
+    let response
     try {
-      const response = await fetch('http://localhost:8081/api/users/login', {
+      response = await fetch('http://localhost:8081/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       })
+    } catch (networkError) {
+      // Only runs when backend is completely unreachable
+      setStatus({ type: 'error', message: 'Cannot connect to server. Connection Unsuccessful.' })
+      setLoading(false)
+      return
+    }
 
+    try {
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
+        // Server responded with a proper error (wrong credentials, user not found, etc.)
+        setStatus({ type: 'error', message: data.message || 'Login failed. Please check your credentials.' })
+        setLoading(false)
+        return
       }
 
       setStatus({ type: 'success', message: data.message || 'Login successful!' })
@@ -46,7 +62,7 @@ function Login({ onBackToRegister, onLoginSuccess }) {
       }
       setFormData({ aadharno: '', password: '' })
     } catch (error) {
-      setStatus({ type: 'error', message: error.message || 'Something went wrong.' })
+      setStatus({ type: 'error', message: 'Unexpected error. Please try again.' })
     } finally {
       setLoading(false)
     }

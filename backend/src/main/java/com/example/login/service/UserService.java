@@ -3,8 +3,10 @@ package com.example.login.service;
 import com.example.login.model.User;
 import com.example.login.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -34,5 +36,19 @@ public class UserService {
 
         return user;
     }
-}
 
+    public User updateUser(Long id, User updatedUser) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (updatedUser.getName() != null && !updatedUser.getName().isEmpty())
+            existingUser.setName(updatedUser.getName());
+        if (updatedUser.getMobile() != null && !updatedUser.getMobile().isEmpty())
+            existingUser.setMobile(updatedUser.getMobile());
+        existingUser.setAddress(updatedUser.getAddress());
+        existingUser.setCropsGrown(updatedUser.getCropsGrown());
+        existingUser.setSeason(updatedUser.getSeason());
+
+        return userRepository.save(existingUser);
+    }
+}

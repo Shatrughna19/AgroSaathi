@@ -23,30 +23,49 @@ function Register({ onBackToLogin }) {
     e.preventDefault()
     setStatus({ type: '', message: '' })
 
-    if (!formData.name || !formData.mobile || !formData.email || !formData.password) {
+    if (!formData.name || !formData.mobile || !formData.email || !formData.aadharno || !formData.password) {
       setStatus({ type: 'error', message: 'Please fill in all fields.' })
       return
     }
 
+    if (formData.aadharno.length !== 12) {
+      setStatus({ type: 'error', message: 'Aadhar number must be exactly 12 digits.' })
+      return
+    }
+
+    if (formData.password.length < 6) {
+      setStatus({ type: 'error', message: 'Password must be at least 6 characters.' })
+      return
+    }
+
     setLoading(true)
+    let response
     try {
-      const response = await fetch('http://localhost:8081/api/users/register', {
+      response = await fetch('http://localhost:8081/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       })
+    } catch (networkError) {
+      // This block only runs when the server is unreachable (backend not started)
+      setStatus({ type: 'error', message: 'Cannot connect to server. Please make sure the backend is running.' })
+      setLoading(false)
+      return
+    }
 
+    try {
+      const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Connection Unsuccessful')
+        // Server responded with an error (e.g. email already registered)
+        setStatus({ type: 'error', message: data.message || 'Registration failed. Please try again.' })
+        return
       }
-
       setStatus({ type: 'success', message: 'User registered successfully!' })
       setFormData({ name: '', mobile: '', email: '', aadharno: '', password: '', role: 'Farmer' })
     } catch (error) {
-      setStatus({ type: 'error', message: error.message || 'Something went wrong.' })
+      setStatus({ type: 'error', message: 'Unexpected error. Please try again.' })
     } finally {
       setLoading(false)
     }
@@ -137,6 +156,7 @@ function Register({ onBackToLogin }) {
               >
                 <option value="Farmer">Farmer</option>
                 <option value="Buyer">Buyer</option>
+                <option value="Shop Owner">Shop Owner</option>
               </select>
             </div>
 

@@ -1,11 +1,8 @@
-
 # 🌾 Agro Saathi – Digital Agricultural Marketplace
-
 Agro Saathi is a demand-based digital agricultural marketplace designed to connect farmers and buyers directly. The platform aims to reduce intermediary dependency, improve transparency, and strengthen farmer–buyer relationships through a structured and secure system.
 
 Currently, the project includes secure user authentication modules and foundational backend architecture. The system is being developed to support a buyer-demand model where buyers post requirements and farmers can select suitable demands to sell their produce.
 
----
 
 ## 🚀 Current Implementation Status
 
@@ -15,10 +12,9 @@ Currently, the project includes secure user authentication modules and foundatio
 ⚠️ Database Integration (In Progress)
 ⚠️ Frontend–Backend Connection (In Progress)
 
----
+
 
 ## 🛠️ Tech Stack
-
 **Frontend:** React.js, Bootstrap
 **Backend:** Spring Boot
 **Database:** PostgreSQL (Setup in Progress)
@@ -36,7 +32,6 @@ To build a transparent, multilingual agricultural marketplace where:
 * Farmers select suitable demands
 * Trade processes become structured and secure
 
----
 
 ## 🔮 Upcoming Features
 

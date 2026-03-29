@@ -1,7 +1,10 @@
 com\example\login\model\BuyerOrder.class
+com\example\login\model\FertilizerListing.class
 com\example\login\repository\BuyerOrderRepository.class
 com\example\login\repository\UserRepository.class
 com\example\login\LoginBackendApplication.class
+com\example\login\repository\FertilizerListingRepository.class
+com\example\login\config\WebConfig.class
 com\example\login\model\CropListing.class
 com\example\login\model\User.class
 com\example\login\config\DatabaseConfig.class

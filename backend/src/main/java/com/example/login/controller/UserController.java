@@ -2,9 +2,11 @@ package com.example.login.controller;
 
 import com.example.login.model.User;
 import com.example.login.service.UserService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,9 +25,9 @@ public class UserController {
             User saved = userService.register(user);
             return ResponseEntity.ok(saved);
         } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(
-                    java.util.Map.of("message", ex.getMessage())
-            );
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
@@ -54,24 +56,66 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             User user = userService.loginWithAadhar(loginRequest.getAadharno(), loginRequest.getPassword());
-            return ResponseEntity.ok(
-                    java.util.Map.of(
-                            "message", "Login successful",
-                            "user", java.util.Map.of(
-                                    "id", user.getId(),
-                                    "name", user.getName(),
-                                    "mobile", user.getMobile(),
-                                    "email", user.getEmail(),
-                                    "aadharno", user.getAadharno(),
-                                    "role", user.getRole()
-                            )
-                    )
-            );
+            
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("name", user.getName());
+            userMap.put("mobile", user.getMobile());
+            userMap.put("email", user.getEmail());
+            userMap.put("aadharno", user.getAadharno());
+            userMap.put("role", user.getRole());
+            userMap.put("address", user.getAddress());
+            userMap.put("cropsGrown", user.getCropsGrown());
+            userMap.put("season", user.getSeason());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login successful");
+            response.put("user", userMap);
+
+            return ResponseEntity.ok(response);
         } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(
-                    java.util.Map.of("message", ex.getMessage())
-            );
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
-}
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        try {
+            User user = userService.updateUser(id, updatedUser);
+            
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("name", user.getName());
+            userMap.put("mobile", user.getMobile());
+            userMap.put("email", user.getEmail());
+            userMap.put("aadharno", user.getAadharno());
+            userMap.put("role", user.getRole());
+            userMap.put("address", user.getAddress());
+            userMap.put("cropsGrown", user.getCropsGrown());
+            userMap.put("season", user.getSeason());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Profile updated successfully");
+            response.put("user", userMap);
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+            org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String errorMessage = error.getDefaultMessage();
+            errors.put("message", errorMessage);
+        });
+        return ResponseEntity.badRequest().body(errors);
+    }
+}

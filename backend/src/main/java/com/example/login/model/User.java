@@ -1,9 +1,9 @@
 package com.example.login.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -37,6 +37,15 @@ public class User {
     @NotBlank
     @Size(min = 6, max = 100)
     private String password;
+
+    @Size(max = 255)
+    private String address;
+
+    @Size(max = 255)
+    private String cropsGrown;
+
+    @Size(max = 50)
+    private String season;
 
     public Long getId() {
         return id;
@@ -92,6 +101,30 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCropsGrown() {
+        return cropsGrown;
+    }
+
+    public void setCropsGrown(String cropsGrown) {
+        this.cropsGrown = cropsGrown;
+    }
+
+    public String getSeason() {
+        return season;
+    }
+
+    public void setSeason(String season) {
+        this.season = season;
     }
 }
 
