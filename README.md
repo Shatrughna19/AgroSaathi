@@ -2,7 +2,7 @@
 
 # 🌾 Agro Saathi
 
-### *Kisan se Bazaar Tak — From Farm to Market*
+### *From Farm to Market*
 
 **A direct-to-farmer digital ecosystem connecting agricultural producers and buyers — eliminating middlemen, ensuring fair pricing, and providing essential farming inputs.**
 
