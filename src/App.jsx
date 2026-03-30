@@ -5,6 +5,8 @@ import Login from './Login.jsx'
 import Marketplace from './Marketplace.jsx'
 import Header from './Header.jsx'
 import Profile from './Profile.jsx'
+import OrdersSection from './OrdersSection.jsx'
+import FertilizerSection from './FertilizerSection.jsx'
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -41,8 +43,16 @@ function App() {
       return <Login onBackToRegister={() => setActivePage('register')} onLoginSuccess={handleLoginSuccess} />
     }
 
-    if (activePage === 'profile' && user) {
-      return <Profile user={user} onLogout={handleLogout} onUpdate={handleUpdateUser} />
+    if (user) {
+      if (activePage === 'profile') {
+        return <Profile user={user} onLogout={handleLogout} onUpdate={handleUpdateUser} />
+      }
+      if (activePage === 'orders') {
+        return <OrdersSection user={user} />
+      }
+      if (activePage === 'fertilizer' && user.role === 'Farmer') {
+        return <FertilizerSection user={user} />
+      }
     }
 
     // Default: Return the pure marketplace directly as an e-commerce landing page

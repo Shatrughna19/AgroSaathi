@@ -15,6 +15,8 @@ public class BuyerOrder {
 
     private Long buyerId;
     private String buyerName;
+    private String buyerMobile;
+    private String buyerEmail;
     private String cropName;
     private String requiredQuantity;
     private Double targetPrice;
@@ -42,6 +44,22 @@ public class BuyerOrder {
 
     public void setBuyerName(String buyerName) {
         this.buyerName = buyerName;
+    }
+
+    public String getBuyerMobile() {
+        return buyerMobile;
+    }
+
+    public void setBuyerMobile(String buyerMobile) {
+        this.buyerMobile = buyerMobile;
+    }
+
+    public String getBuyerEmail() {
+        return buyerEmail;
+    }
+
+    public void setBuyerEmail(String buyerEmail) {
+        this.buyerEmail = buyerEmail;
     }
 
     public String getCropName() {

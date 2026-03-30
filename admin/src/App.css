@@ -1,0 +1,128 @@
+.admin-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+}
+
+.admin-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.admin-nav-btn {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.admin-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+  color: white;
+}
+
+.admin-nav-btn.active {
+  background-color: white;
+  color: #28a745;
+  border-color: white;
+}
+
+.auth-card {
+  max-width: 450px;
+  border-radius: 1rem;
+  background: white;
+  border: none;
+}
+
+.admin-input {
+  border-radius: 0.5rem;
+  border: 2px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.admin-input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.admin-btn {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-hero {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+}
+
+.crop-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.crop-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #28a745;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-verified {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-background {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f0f0f0 100%);
+  padding: 2rem 0;
+}

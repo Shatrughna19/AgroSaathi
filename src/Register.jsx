@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 
 function Register({ onBackToLogin }) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
@@ -24,17 +26,17 @@ function Register({ onBackToLogin }) {
     setStatus({ type: '', message: '' })
 
     if (!formData.name || !formData.mobile || !formData.email || !formData.aadharno || !formData.password) {
-      setStatus({ type: 'error', message: 'Please fill in all fields.' })
+      setStatus({ type: 'error', message: t('register.pleaseFillAll') })
       return
     }
 
     if (formData.aadharno.length !== 12) {
-      setStatus({ type: 'error', message: 'Aadhar number must be exactly 12 digits.' })
+      setStatus({ type: 'error', message: t('register.aadharMust12') })
       return
     }
 
     if (formData.password.length < 6) {
-      setStatus({ type: 'error', message: 'Password must be at least 6 characters.' })
+      setStatus({ type: 'error', message: t('register.passwordMinimum') })
       return
     }
 
@@ -50,7 +52,7 @@ function Register({ onBackToLogin }) {
       })
     } catch (networkError) {
       // This block only runs when the server is unreachable (backend not started)
-      setStatus({ type: 'error', message: 'Cannot connect to server. Please make sure the backend is running.' })
+      setStatus({ type: 'error', message: t('register.cannotConnect') })
       setLoading(false)
       return
     }
@@ -59,13 +61,13 @@ function Register({ onBackToLogin }) {
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         // Server responded with an error (e.g. email already registered)
-        setStatus({ type: 'error', message: data.message || 'Registration failed. Please try again.' })
+        setStatus({ type: 'error', message: data.message || t('register.registrationFailed') })
         return
       }
-      setStatus({ type: 'success', message: 'User registered successfully!' })
+      setStatus({ type: 'success', message: t('register.success') })
       setFormData({ name: '', mobile: '', email: '', aadharno: '', password: '', role: 'Farmer' })
     } catch (error) {
-      setStatus({ type: 'error', message: 'Unexpected error. Please try again.' })
+      setStatus({ type: 'error', message: t('register.unexpectedError') })
     } finally {
       setLoading(false)
     }
@@ -75,11 +77,11 @@ function Register({ onBackToLogin }) {
     <div className="page-background fade-in">
       <div className="container py-5 d-flex align-items-center justify-content-center">
         <div className="auth-card shadow-lg rounded-4 p-4 p-md-5 hover-lift">
-          <h2 className="mb-4 text-center text-success">Register</h2>
+          <h2 className="mb-4 text-center text-success">{t('register.title')}</h2>
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="name" className="form-label">
-                Name
+                {t('register.firstName')}
               </label>
               <input
                 id="name"
@@ -88,14 +90,14 @@ function Register({ onBackToLogin }) {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter your name"
+                placeholder={t('register.firstName')}
                 required
               />
             </div>
 
             <div className="mb-3">
               <label htmlFor="mobile" className="form-label">
-                Mobile Number
+                {t('register.mobile')}
               </label>
               <input
                 id="mobile"
@@ -104,14 +106,14 @@ function Register({ onBackToLogin }) {
                 type="tel"
                 value={formData.mobile}
                 onChange={handleChange}
-                placeholder="Enter your mobile number"
+                placeholder={t('register.mobile')}
                 required
               />
             </div>
 
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
-                Email
+                {t('register.email')}
               </label>
               <input
                 id="email"
@@ -120,14 +122,14 @@ function Register({ onBackToLogin }) {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder={t('register.email')}
                 required
               />
             </div>
 
             <div className="mb-3">
               <label htmlFor="aadharno" className="form-label">
-                Aadhar Number
+                {t('register.aadharNumber')}
               </label>
               <input
                 id="aadharno"
@@ -137,14 +139,14 @@ function Register({ onBackToLogin }) {
                 maxLength={12}
                 value={formData.aadharno}
                 onChange={handleChange}
-                placeholder="Enter your Aadhar Number"
+                placeholder={t('register.aadharNumber')}
                 required
               />
             </div>
 
             <div className="mb-3">
               <label htmlFor="role" className="form-label">
-                Role
+                {t('register.role')}
               </label>
               <select
                 id="role"
@@ -154,15 +156,15 @@ function Register({ onBackToLogin }) {
                 onChange={handleChange}
                 required
               >
-                <option value="Farmer">Farmer</option>
-                <option value="Buyer">Buyer</option>
-                <option value="Shop Owner">Shop Owner</option>
+                <option value="Farmer">{t('register.farmer')}</option>
+                <option value="Buyer">{t('register.buyer')}</option>
+                <option value="Shop Owner">{t('register.shopOwner')}</option>
               </select>
             </div>
 
             <div className="mb-3">
               <label htmlFor="password" className="form-label">
-                Password
+                {t('register.password')}
               </label>
               <input
                 id="password"
@@ -171,13 +173,13 @@ function Register({ onBackToLogin }) {
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder={t('register.password')}
                 required
               />
             </div>
 
             <button type="submit" className="btn btn-success w-100 agro-btn" disabled={loading}>
-              {loading ? 'Submitting...' : 'Submit'}
+              {loading ? t('register.submitting') : t('register.submit')}
             </button>
 
             {status.message && (
@@ -197,7 +199,7 @@ function Register({ onBackToLogin }) {
               className="btn btn-link w-100 mt-3 text-decoration-none text-success"
               onClick={onBackToLogin}
             >
-              ← Go to Login
+              {t('register.goToLogin')}
             </button>
           )}
         </div>

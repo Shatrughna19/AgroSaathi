@@ -15,6 +15,8 @@ public class CropListing {
 
     private Long farmerId;
     private String farmerName;
+    private String farmerMobile;
+    private String farmerEmail;
     private String cropName;
     private String quantity;
     private Double pricePerUnit;
@@ -44,6 +46,22 @@ public class CropListing {
 
     public void setFarmerName(String farmerName) {
         this.farmerName = farmerName;
+    }
+
+    public String getFarmerMobile() {
+        return farmerMobile;
+    }
+
+    public void setFarmerMobile(String farmerMobile) {
+        this.farmerMobile = farmerMobile;
+    }
+
+    public String getFarmerEmail() {
+        return farmerEmail;
+    }
+
+    public void setFarmerEmail(String farmerEmail) {
+        this.farmerEmail = farmerEmail;
     }
 
     public String getCropName() {

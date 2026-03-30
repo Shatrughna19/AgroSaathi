@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 
 function Profile({ user, onLogout, onUpdate }) {
+  const { t } = useTranslation()
   if (!user) return null
 
   const [activeTab, setActiveTab] = useState('details') // 'details', 'manage'
@@ -106,6 +108,8 @@ function Profile({ user, onLogout, onUpdate }) {
     const payload = {
       farmerId: user.id,
       farmerName: user.name,
+      farmerMobile: user.mobile,
+      farmerEmail: user.email,
       cropName: listingForm.cropName,
       season: listingForm.season,
       quantity: listingForm.quantity,
@@ -141,6 +145,8 @@ function Profile({ user, onLogout, onUpdate }) {
     const payload = {
       buyerId: user.id,
       buyerName: user.name,
+      buyerMobile: user.mobile,
+      buyerEmail: user.email,
       cropName: orderForm.cropName,
       requiredQuantity: orderForm.requiredQuantity,
       targetPrice: parseFloat(orderForm.targetPrice)

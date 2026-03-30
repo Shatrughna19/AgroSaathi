@@ -1,0 +1,26 @@
+:root {
+  --color-text: rgba(255, 255, 255, 0.87);
+  --color-background: #242424;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--color-text);
+  background-color: var(--color-background);
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+body {
+  color: #213547;
+  background-color: #ffffff;
+}

@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 
 function Login({ onBackToRegister, onLoginSuccess }) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     aadharno: '',
     password: '',
@@ -20,12 +22,12 @@ function Login({ onBackToRegister, onLoginSuccess }) {
     setStatus({ type: '', message: '' })
 
     if (!formData.aadharno || !formData.password) {
-      setStatus({ type: 'error', message: 'Please fill in all fields.' })
+      setStatus({ type: 'error', message: t('login.pleaseFillAll') })
       return
     }
 
     if (formData.aadharno.length !== 12) {
-      setStatus({ type: 'error', message: 'Aadhar number must be exactly 12 digits.' })
+      setStatus({ type: 'error', message: t('login.aadharMust12') })
       return
     }
 
@@ -41,7 +43,7 @@ function Login({ onBackToRegister, onLoginSuccess }) {
       })
     } catch (networkError) {
       // Only runs when backend is completely unreachable
-      setStatus({ type: 'error', message: 'Cannot connect to server. Connection Unsuccessful.' })
+      setStatus({ type: 'error', message: t('login.cannotConnect') })
       setLoading(false)
       return
     }
@@ -51,7 +53,7 @@ function Login({ onBackToRegister, onLoginSuccess }) {
 
       if (!response.ok) {
         // Server responded with a proper error (wrong credentials, user not found, etc.)
-        setStatus({ type: 'error', message: data.message || 'Login failed. Please check your credentials.' })
+        setStatus({ type: 'error', message: data.message || t('login.loginFailed') })
         setLoading(false)
         return
       }
@@ -62,7 +64,7 @@ function Login({ onBackToRegister, onLoginSuccess }) {
       }
       setFormData({ aadharno: '', password: '' })
     } catch (error) {
-      setStatus({ type: 'error', message: 'Unexpected error. Please try again.' })
+      setStatus({ type: 'error', message: t('login.unexpectedError') })
     } finally {
       setLoading(false)
     }
@@ -72,11 +74,11 @@ function Login({ onBackToRegister, onLoginSuccess }) {
     <div className="page-background fade-in">
       <div className="container py-5 d-flex align-items-center justify-content-center">
         <div className="auth-card shadow-lg rounded-4 p-4 p-md-5 hover-lift">
-          <h2 className="mb-4 text-center text-success">Login</h2>
+          <h2 className="mb-4 text-center text-success">{t('login.title')}</h2>
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="aadharno" className="form-label">
-                Aadhar Number
+                {t('login.aadharNumber')}
               </label>
               <input
                 id="aadharno"
@@ -86,14 +88,14 @@ function Login({ onBackToRegister, onLoginSuccess }) {
                 maxLength={12}
                 value={formData.aadharno}
                 onChange={handleChange}
-                placeholder="Enter your Aadhar Number"
+                placeholder={t('login.aadharNumber')}
                 required
               />
             </div>
 
             <div className="mb-3">
               <label htmlFor="password" className="form-label">
-                Password
+                {t('login.password')}
               </label>
               <input
                 id="password"
@@ -102,13 +104,13 @@ function Login({ onBackToRegister, onLoginSuccess }) {
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder={t('login.password')}
                 required
               />
             </div>
 
             <button type="submit" className="btn btn-success w-100 agro-btn" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? t('login.loggingIn') : t('login.submit')}
             </button>
 
             {status.message && (
@@ -128,7 +130,7 @@ function Login({ onBackToRegister, onLoginSuccess }) {
               className="btn btn-link w-100 mt-3 text-decoration-none text-success"
               onClick={onBackToRegister}
             >
-              ← Back to Register
+              {t('login.backToRegister')}
             </button>
           )}
         </div>
