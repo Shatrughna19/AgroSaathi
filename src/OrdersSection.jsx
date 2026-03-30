@@ -17,10 +17,10 @@ function OrdersSection({ user }) {
   const fetchOrders = async () => {
     setLoading(true)
     try {
-      const endpoint = user.role === 'Farmer' 
+      const endpoint = user.role === 'Farmer'
         ? `${API_BASE}/orders/crop/farmer/${user.id}`
         : `${API_BASE}/orders/crop/buyer/${user.id}`
-      
+
       const res = await fetch(endpoint)
       if (res.ok) {
         setOrders(await res.json())
@@ -50,8 +50,8 @@ function OrdersSection({ user }) {
             {user.role === 'Farmer' ? t('orders.myOrders') : t('orders.myOrders')}
           </h1>
           <p className="lead mb-0">
-            {user.role === 'Farmer' 
-              ? 'Track and manage orders placed by buyers for your crops.' 
+            {user.role === 'Farmer'
+              ? 'Track and manage orders placed by buyers for your crops.'
               : 'Keep track of the fresh produce you have ordered.'}
           </p>
         </div>
