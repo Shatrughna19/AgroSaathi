@@ -5,6 +5,7 @@ import com.example.login.service.UserService;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +68,7 @@ public class UserController {
             userMap.put("address", user.getAddress());
             userMap.put("cropsGrown", user.getCropsGrown());
             userMap.put("season", user.getSeason());
+            userMap.put("profilePhoto", user.getProfilePhoto());
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful");
@@ -95,6 +97,7 @@ public class UserController {
             userMap.put("address", user.getAddress());
             userMap.put("cropsGrown", user.getCropsGrown());
             userMap.put("season", user.getSeason());
+            userMap.put("profilePhoto", user.getProfilePhoto());
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Profile updated successfully");
@@ -102,6 +105,33 @@ public class UserController {
 
             return ResponseEntity.ok(response);
         } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PutMapping(value = "/{id}/photo", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadPhoto(@PathVariable Long id, @RequestPart(value = "image") MultipartFile image) {
+        try {
+            User user = userService.uploadProfilePhoto(id, image);
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("name", user.getName());
+            userMap.put("mobile", user.getMobile());
+            userMap.put("email", user.getEmail());
+            userMap.put("aadharno", user.getAadharno());
+            userMap.put("role", user.getRole());
+            userMap.put("address", user.getAddress());
+            userMap.put("cropsGrown", user.getCropsGrown());
+            userMap.put("season", user.getSeason());
+            userMap.put("profilePhoto", user.getProfilePhoto());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Profile photo updated successfully");
+            response.put("user", userMap);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
             Map<String, String> error = new HashMap<>();
             error.put("message", ex.getMessage());
             return ResponseEntity.badRequest().body(error);

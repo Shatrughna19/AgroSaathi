@@ -38,14 +38,19 @@ function FertilizerSection({ user }) {
 
   return (
     <div className="page-background fade-in pb-5" style={{ minHeight: '100vh' }}>
-      <div className="marketplace-hero bg-info text-white py-5 mb-5 shadow-sm text-center bg-gradient">
-        <div className="container">
-          <h1 className="fw-bold mb-3">{t('marketplace.fertilizerListings')}</h1>
-          <p className="lead mb-0">Discover high-quality local fertilizers and soil enhancers from trusted local shops.</p>
+      <div className="market-hero container px-3">
+        <div className="d-flex flex-column flex-md-row align-items-center justify-content-between">
+          <div>
+            <h1 className="fw-bold mb-0">{t('marketplace.fertilizerListings')}</h1>
+            <p className="mb-0">Discover local fertilizers and trusted shop owners in your area.</p>
+          </div>
+          <div className="mt-3 mt-md-0">
+            <small className="text-muted">Filter by location, price, and brand coming soon</small>
+          </div>
         </div>
       </div>
 
-      <div className="container px-4">
+      <div className="container px-3">
         {loading ? (
           <div className="d-flex justify-content-center my-5">
             <div className="spinner-border text-info" role="status">
@@ -58,33 +63,24 @@ function FertilizerSection({ user }) {
             <h4 className="text-muted">No fertilizers currently listed in your area.</h4>
           </div>
         ) : (
-          <div className="row g-4">
+          <div className="market-grid">
             {fertilizers.map((item) => (
-              <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={item.id}>
-                <div className="card h-100 shadow border-0 rounded-4 overflow-hidden hover-lift border-top border-info border-4">
-                  {item.imageUrl && (
-                    <img 
-                      src={`http://localhost:8081${item.imageUrl}`} 
-                      alt={item.fertilizerName} 
-                      className="card-img-top object-fit-cover" 
-                      style={{ height: '220px' }} 
-                    />
-                  )}
-                  <div className="card-body d-flex flex-column p-4">
-                    <h5 className="card-title fw-bold text-dark mb-0">{item.fertilizerName}</h5>
-                    <div className="text-info fw-bold fs-5 mb-2">₹{item.price}</div>
-                    <div className="text-muted small mb-3">
-                      <i className="bi bi-geo-alt me-1 text-danger"></i> {item.location || 'India'}
-                    </div>
-                    <p className="text-muted small mb-4 line-clamp-2">{item.description}</p>
-                    <button 
-                      type="button" 
-                      className="btn btn-outline-info w-100 mt-auto rounded-pill fw-bold border-2" 
-                      onClick={() => openDetails(item)}
-                    >
-                      View Details & Enquiry
-                    </button>
+              <div className="market-card" key={item.id}>
+                {item.imageUrl ? (
+                  <img src={`http://localhost:8081${item.imageUrl}`} alt={item.fertilizerName} className="media" />
+                ) : (
+                  <div style={{height: '180px'}} className="bg-slate-100 d-flex align-items-center justify-content-center text-slate-400">
+                    <i className="bi bi-shop-window fs-1"></i>
                   </div>
+                )}
+                <div className="p-3 d-flex flex-column h-100">
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <h5 className="fw-bold mb-0">{item.fertilizerName}</h5>
+                    <div className="text-info fw-bold">₹{item.price}</div>
+                  </div>
+                  <div className="text-muted small mb-2"><i className="bi bi-geo-alt me-1 text-danger"></i> {item.location || 'India'}</div>
+                  <p className="text-muted small mb-3 line-clamp-2">{item.description}</p>
+                  <button type="button" className="btn btn-outline-info w-100 mt-auto rounded-pill fw-bold" onClick={() => openDetails(item)}>View Details & Enquiry</button>
                 </div>
               </div>
             ))}

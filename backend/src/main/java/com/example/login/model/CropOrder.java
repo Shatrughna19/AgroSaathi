@@ -23,6 +23,8 @@ public class CropOrder {
     private String quantity;
     private Double price;
     private String status = "PENDING"; // PENDING, ACCEPTED, REJECTED, COMPLETED
+    private Boolean farmerAccepted = false;
+    private Boolean buyerAccepted = false;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public CropOrder() {}
@@ -40,6 +42,8 @@ public class CropOrder {
         this.quantity = quantity;
         this.price = price;
         this.status = "PENDING";
+        this.farmerAccepted = false;
+        this.buyerAccepted = false;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -75,6 +79,12 @@ public class CropOrder {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Boolean getFarmerAccepted() { return farmerAccepted; }
+    public void setFarmerAccepted(Boolean farmerAccepted) { this.farmerAccepted = farmerAccepted; }
+
+    public Boolean getBuyerAccepted() { return buyerAccepted; }
+    public void setBuyerAccepted(Boolean buyerAccepted) { this.buyerAccepted = buyerAccepted; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

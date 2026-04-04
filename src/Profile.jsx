@@ -17,6 +17,7 @@ function Profile({ user, onLogout, onUpdate }) {
     cropsGrown: user.cropsGrown || '',
     season: user.season || ''
   })
+  const [profileImageFile, setProfileImageFile] = useState(null)
 
   // Marketplace states
   const [myItems, setMyItems] = useState([])
@@ -216,8 +217,36 @@ function Profile({ user, onLogout, onUpdate }) {
           <div className="col-12 col-lg-3 mb-4">
             <div className={`card shadow-sm rounded-4 border-0 h-100 border-top ${user.role === 'Shop Owner' ? 'border-primary' : 'border-success'} border-4`}>
               <div className="card-body p-4 text-center">
-                <div className={`${user.role === 'Shop Owner' ? 'bg-primary' : 'bg-success'} text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow`} style={{ width: '80px', height: '80px', fontSize: '2rem' }}>
-                  <i className={user.role === 'Shop Owner' ? 'bi bi-shop' : 'bi bi-person-fill'}></i>
+                <div style={{ width: '88px', height: '88px', margin: '0 auto' }}>
+                  {user.profilePhoto ? (
+                    <img src={`http://localhost:8081${user.profilePhoto}`} alt="Profile" className="rounded-circle shadow" style={{ width: '88px', height: '88px', objectFit: 'cover' }} />
+                  ) : (
+                    <div className={`${user.role === 'Shop Owner' ? 'bg-primary' : 'bg-success'} text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow`} style={{ width: '88px', height: '88px', fontSize: '2rem' }}>
+                      <i className={user.role === 'Shop Owner' ? 'bi bi-shop' : 'bi bi-person-fill'}></i>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2 mb-3">
+                  <input id="profilePhotoInput" type="file" accept="image/*" className="d-none" onChange={(e) => setProfileImageFile(e.target.files[0])} />
+                  <div className="d-flex gap-2 justify-content-center">
+                    <button className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => document.getElementById('profilePhotoInput').click()}>Change Photo</button>
+                    <button className="btn btn-sm btn-success rounded-pill" onClick={async () => {
+                      if (!profileImageFile) { alert('Please choose an image first'); return }
+                      const form = new FormData(); form.append('image', profileImageFile)
+                      try {
+                        const res = await fetch(`http://localhost:8081/api/users/${user.id}/photo`, { method: 'PUT', body: form })
+                        if (res.ok) {
+                          const data = await res.json()
+                          if (data.user) {
+                            onUpdate(data.user)
+                            alert('Profile photo updated')
+                          }
+                        } else {
+                          const err = await res.json(); alert(err.message || 'Failed to upload')
+                        }
+                      } catch (e) { alert('Network error') }
+                    }}>Upload</button>
+                  </div>
                 </div>
                 <h4 className="fw-bold text-dark">{user.name}</h4>
                 <p className={`text-muted small badge ${user.role === 'Shop Owner' ? 'bg-primary-subtle text-primary border-primary' : 'bg-success-subtle text-success border-success'} border px-3 py-2 rounded-pill mt-2`}>

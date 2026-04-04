@@ -22,7 +22,7 @@ function Header({ activePage, onNavigate, user }) {
     if (user) {
       const fetchNotifications = async () => {
         try {
-          const notifRes = await fetch(`${API_BASE}/notifications/user/${user.id}`)
+          const notifRes = await fetch(`${API_BASE}/notifications/user/${user.id}/unread`)
           if (notifRes.ok) {
             const data = await notifRes.json();
             setNotifications(data);
@@ -33,7 +33,7 @@ function Header({ activePage, onNavigate, user }) {
       }
       fetchNotifications()
     }
-  }, [user])
+  }, [user, activePage])
 
   const unreadCount = notifications.filter(n => !n.isRead).length
 
@@ -138,7 +138,11 @@ function Header({ activePage, onNavigate, user }) {
                 onClick={() => onNavigate('profile')}
                 style={{ width: '40px', height: '40px', overflow: 'hidden' }}
               >
-                <img src={userIcon} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {user && user.profilePhoto ? (
+                  <img src={`http://localhost:8081${user.profilePhoto}`} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <img src={userIcon} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                )}
               </button>
 
               {user.role === 'Farmer' && (
@@ -333,7 +337,7 @@ function Header({ activePage, onNavigate, user }) {
                           onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); }}
                           style={{ fontSize: '11px', textDecoration: 'none' }}
                         >
-                          {t('common.info')}
+                          {t('header.markAsRead')}
                         </button>
                       )}
                     </div>

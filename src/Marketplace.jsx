@@ -106,244 +106,284 @@ function Marketplace({ user, onNavigate }) {
     }
   }
 
+  const handleOfferFulfillment = async () => {
+    if (!user || user.role !== 'Farmer') return
+    try {
+      const response = await fetch(`${API_BASE}/orders/buyer/${selectedItem.id}/fulfill?farmerId=${user.id}&farmerName=${user.name}&farmerMobile=${user.mobile}&farmerEmail=${user.email}`, {
+        method: 'PUT'
+      })
+      if (response.ok) {
+        alert('Fulfillment offer sent to buyer!')
+        // Update local state
+        setOrders(orders.map(o => o.id === selectedItem.id ? { ...o, status: 'FULFILLED', fulfilledByFarmerId: user.id } : o))
+        closeDetails()
+      }
+    } catch (error) {
+      alert('Failed to send fulfillment offer: ' + error.message)
+    }
+  }
+
+  const handleAcceptFulfillment = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/orders/buyer/${selectedItem.id}/accept-fulfillment`, {
+        method: 'PUT'
+      })
+      if (response.ok) {
+        alert('Fulfillment accepted! Transaction completed.')
+        // Update local state
+        setOrders(orders.map(o => o.id === selectedItem.id ? { ...o, status: 'ACCEPTED' } : o))
+        closeDetails()
+      }
+    } catch (error) {
+      alert('Failed to accept fulfillment: ' + error.message)
+    }
+  }
+
+  const getRequirementStatusBadge = (status) => {
+    switch (status) {
+      case 'PENDING': return 'bg-warning-subtle text-warning-emphasis border-warning-subtle'
+      case 'FULFILLED': return 'bg-info-subtle text-info-emphasis border-info-subtle'
+      case 'ACCEPTED': return 'bg-success-subtle text-success-emphasis border-success-subtle'
+      default: return 'bg-secondary-subtle'
+    }
+  }
+
   return (
-    <div className="page-background fade-in pb-5">
-      {/* Hero Section */}
-      <div className="marketplace-hero bg-success text-white py-5 mb-5 shadow-sm text-center bg-gradient">
-        <div className="container">
-          <h1 className="fw-bold mb-3">{t('marketplace.storefront')}</h1>
-          <p className="lead mb-0">{t('marketplace.discoverFresh')}</p>
+    <div className="fade-in-up">
+      <div className="market-hero container px-3">
+        <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+          <div>
+            <h1 className="fw-extrabold">Agro Marketplace — Local, Fair, Direct</h1>
+            <p className="mb-0">Buy directly from farmers or list produce to reach buyers across your region.</p>
+          </div>
+          <div className="mt-3 mt-md-0 d-flex gap-2">
+            <button 
+              className={`btn-modern ${activeTab === 'listings' ? 'btn-modern-primary text-white' : 'btn-modern-outline'}`}
+              onClick={() => setActiveTab('listings')}
+            >
+              <i className="bi bi-shop"></i> <span>Storefront</span>
+            </button>
+            <button 
+              className={`btn-modern ${activeTab === 'orders' ? 'btn-modern-primary text-white' : 'btn-modern-outline'}`}
+              onClick={() => setActiveTab('orders')}
+            >
+              <i className="bi bi-lightning-charge"></i> <span>Market Demands</span>
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className="container px-4">
-        {/* Tab Navigation */}
-        <div className="d-flex flex-wrap justify-content-center gap-3 mb-5 border-bottom pb-4">
+      {/* Page Header */}
+      <header className="page-header-modern">
+        <div>
+          <h1 className="page-title-modern">Agro Marketplace</h1>
+          <p className="page-subtitle-modern">Direct trade between local farmers and quality buyers.</p>
+        </div>
+        <div className="d-flex gap-2">
           <button 
-            type="button" 
-            className={`btn px-4 py-2 rounded-pill fw-medium ${activeTab === 'listings' ? 'btn-success shadow' : 'btn-outline-success border-2'}`}
+            className={`btn-modern ${activeTab === 'listings' ? 'btn-modern-primary text-white' : 'btn-modern-outline'}`}
             onClick={() => setActiveTab('listings')}
           >
-            <i className="bi bi-cart me-2"></i> {t('marketplace.freshProduce')}
+            <i className="bi bi-shop"></i> <span>Storefront</span>
           </button>
           <button 
-            type="button" 
-            className={`btn px-4 py-2 rounded-pill fw-medium ${activeTab === 'orders' ? 'btn-warning shadow text-dark' : 'btn-outline-warning border-2 text-dark'}`}
+            className={`btn-modern ${activeTab === 'orders' ? 'btn-modern-primary text-white' : 'btn-modern-outline'}`}
             onClick={() => setActiveTab('orders')}
           >
-            <i className="bi bi-clipboard-data me-2"></i> {t('marketplace.marketDemands')}
+            <i className="bi bi-lightning-charge"></i> <span>Market Demands</span>
           </button>
         </div>
+      </header>
 
-        {/* Tab Content */}
+      {/* Content Area */}
+      <div className="container px-3">
         {loading ? (
-          <div className="d-flex justify-content-center my-5">
-            <div className="spinner-border text-success" role="status">
-              <span className="visually-hidden">{t('marketplace.loading')}</span>
+          <div className="d-flex justify-content-center my-5 py-5">
+            <div className="spinner-grow text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           </div>
         ) : (
-          <div className="row g-4">
+          <div>
+          <div className="market-grid">
             {activeTab === 'listings' && listings.length === 0 && (
-              <div className="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
-                <i className="bi bi-cart-x display-1 text-muted d-block mb-3"></i>
-                <h4 className="text-muted">{t('marketplace.loading')}</h4>
+              <div className="col-12 text-center py-5 bg-white rounded-5 shadow-sm border">
+                <i className="bi bi-cart-x display-1 text-slate-300 d-block mb-3"></i>
+                <h4 className="text-slate-500">No Listings Available</h4>
               </div>
             )}
-            
+
             {activeTab === 'listings' && listings.map((item) => (
-              <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={item.id}>
-                <div className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden hover-lift">
-                  {item.imageUrl && <img src={`http://localhost:8081${item.imageUrl}`} alt={item.cropName} className="card-img-top object-fit-cover" style={{ height: '220px' }} />}
-                  <div className="card-body d-flex flex-column p-4">
-                    <h5 className="card-title fw-bold text-success mb-0">{item.cropName}</h5>
-                    <div className="text-muted small mb-3">
-                      <i className="bi bi-person me-1"></i> {item.farmerName}
-                    </div>
-                    <div className="d-flex justify-content-between mb-3 bg-light rounded-3 p-3">
-                      <div>
-                        <div className="small text-muted mb-1">Quantity</div>
-                        <div className="fw-semibold text-dark">{item.quantity}</div>
-                      </div>
-                      <div className="text-end">
-                        <div className="small text-muted mb-1">Price</div>
-                        <div className="fw-semibold text-success">₹{item.pricePerUnit}</div>
-                      </div>
-                    </div>
-                    <button type="button" className="btn btn-outline-success w-100 mt-auto rounded-pill fw-medium" onClick={() => openDetails(item, 'listing')}>View Full Details</button>
+              <div className="market-card" key={item.id}>
+                {item.imageUrl ? (
+                  <img src={`http://localhost:8081${item.imageUrl}`} alt={item.cropName} className="media" />
+                ) : (
+                  <div className="bg-slate-100 d-flex align-items-center justify-content-center text-slate-400" style={{ height: '180px' }}>
+                    <i className="bi bi-image fs-1"></i>
                   </div>
+                )}
+                <div className="p-3 d-flex flex-column h-100">
+                  <div className="d-flex justify-content-between align-items-start">
+                    <h5 className="fw-bold text-slate-900 mb-1">{item.cropName}</h5>
+                    <span className="badge-modern badge-success-modern">₹{item.pricePerUnit}/unit</span>
+                  </div>
+                  <div className="text-slate-500 small mb-2 d-flex align-items-center gap-1">
+                    <i className="bi bi-person-circle"></i> {item.farmerName}
+                  </div>
+
+                  <div className="bg-slate-50 rounded-3 p-2 mb-3 mt-auto border border-slate-100">
+                    <div className="d-flex justify-content-between text-slate-600 small">
+                      <span>Availability</span>
+                      <span className="fw-bold text-slate-900">{item.quantity}</span>
+                    </div>
+                  </div>
+
+                  <button className="btn-modern btn-modern-outline w-100" onClick={() => openDetails(item, 'listing')}>
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
 
             {activeTab === 'orders' && orders.length === 0 && (
-              <div className="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
-                <i className="bi bi-clipboard-x display-1 text-muted d-block mb-3"></i>
-                <h4 className="text-muted">No buyer demands at the moment.</h4>
+              <div className="col-12 text-center py-5 bg-white rounded-5 shadow-sm border">
+                <i className="bi bi-lightning display-1 text-slate-300 d-block mb-3"></i>
+                <h4 className="text-slate-500">No active demands.</h4>
               </div>
             )}
             
             {activeTab === 'orders' && orders.map((item) => (
-              <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={item.id}>
-                <div className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden hover-lift border-top border-warning border-4">
-                  <div className="card-body d-flex flex-column p-4">
-                    <h5 className="card-title fw-bold mb-0">{item.cropName}</h5>
-                    <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-1 small mb-3">WANTED</span>
-                    <div className="text-muted small mb-3">
-                      <i className="bi bi-person me-1"></i> {item.buyerName}
-                    </div>
-                    <div className="d-flex justify-content-between mb-4 bg-light rounded-3 p-3 mt-auto">
-                      <div>
-                        <div className="small text-muted mb-1">Required</div>
-                        <div className="fw-semibold text-dark">{item.requiredQuantity}</div>
-                      </div>
-                      <div className="text-end">
-                        <div className="small text-muted mb-1">Willing Price</div>
-                        <div className="fw-semibold text-warning-emphasis">₹{item.targetPrice}</div>
-                      </div>
-                    </div>
-                    <button type="button" className="btn btn-warning w-100 text-dark fw-medium rounded-pill shadow-sm" onClick={() => openDetails(item, 'order')}>View Details</button>
+              <div className="market-card p-3" key={item.id}>
+                <div className={`d-flex flex-column h-100 ${item.status === 'PENDING' ? '' : ''}`}>
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <h5 className="fw-bold text-slate-900 mb-0">{item.cropName}</h5>
+                    <span className={`badge-modern ${getRequirementStatusBadge(item.status)}`}>{item.status}</span>
                   </div>
+                  <div className="text-slate-500 small mb-3">Requested by <strong className="text-slate-700">{item.buyerName}</strong></div>
+                  <div className="mb-3 bg-amber-50 rounded-3 p-2" style={{ backgroundColor: '#fffbeb' }}>
+                    <div className="d-flex justify-content-between small"><span>Qty</span><span className="fw-bold">{item.requiredQuantity}</span></div>
+                    <div className="d-flex justify-content-between small"><span>Budget</span><span className="fw-bold text-amber-700">₹{item.targetPrice}</span></div>
+                  </div>
+                  <button className="btn-modern btn-modern-primary w-100 mt-auto" onClick={() => openDetails(item, 'order')}>Fulfill Demand</button>
                 </div>
               </div>
             ))}
           </div>
+        </div>
         )}
       </div>
 
-      {/* Shared Details Modal */}
+      {/* Modern Details Modal */}
       {selectedItem && (
-        <div className="modal show d-block fade" style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} tabIndex="-1">
+        <div className="modal show d-block fade" style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }} tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-              <div className={`modal-header border-0 text-white 
-                ${modalType === 'listing' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                <h5 className="modal-title fw-bold">
-                  {modalType === 'listing' ? 'Crop Listing Details' : 'Buyer Requirement Details'}
-                </h5>
-                <button type="button" className={`btn-close ${modalType === 'order' ? '' : 'btn-close-white'}`} onClick={closeDetails}></button>
-              </div>
-              
-              <div className="modal-body p-0 bg-light">
-                {modalType === 'listing' && selectedItem.imageUrl && (
-                  <img src={`http://localhost:8081${selectedItem.imageUrl}`} alt={selectedItem.cropName} className="img-fluid w-100 object-fit-contain bg-dark" style={{ maxHeight: '380px' }} />
-                )}
-                
-                <div className="p-4 p-md-5 bg-white">
-                  <h2 className={`mb-4 fw-bold 
-                    ${modalType === 'listing' ? 'text-success' 
-                     : 'text-warning-emphasis'}`}>
-                    {selectedItem.cropName}
-                  </h2>
-                  
-                  <div className="row g-4">
-                    {/* LISTING DETAILS */}
-                    {modalType === 'listing' && (
-                      <>
-                        <div className="col-sm-6">
-                          <label className="text-muted small text-uppercase mb-1">Farmer Name</label>
-                          <div className="fs-5 fw-medium text-dark">{selectedItem.farmerName}</div>
+            <div className="modal-content border-0 shadow-premium rounded-5 overflow-hidden">
+              <div className="modal-body p-0">
+                <div className="row g-0">
+                  {modalType === 'listing' && (
+                    <div className="col-lg-5 bg-dark d-none d-lg-block">
+                      {selectedItem.imageUrl ? (
+                        <img src={`http://localhost:8081${selectedItem.imageUrl}`} alt={selectedItem.cropName} className="w-100 h-100 object-fit-cover opacity-90" />
+                      ) : (
+                        <div className="w-100 h-100 d-flex align-items-center justify-content-center text-white-50">
+                          <i className="bi bi-image display-1"></i>
                         </div>
-                        <div className="col-sm-6">
-                          <label className="text-muted small text-uppercase mb-1">Available Quantity</label>
-                          <div className="fs-5 fw-medium text-dark">{selectedItem.quantity}</div>
+                      )}
+                    </div>
+                  )}
+                  <div className={modalType === 'listing' ? "col-lg-7" : "col-12"}>
+                    <div className="p-4 p-md-5">
+                      <div className="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                          <span className={`badge border rounded-pill px-3 py-2 mb-2 fw-bold ${modalType === 'listing' ? 'bg-success-subtle text-success' : getRequirementStatusBadge(selectedItem.status)}`}>
+                            {modalType === 'listing' ? 'Available' : selectedItem.status}
+                          </span>
+                          <h2 className="display-6 fw-bold text-dark">{selectedItem.cropName}</h2>
                         </div>
-                        <div className="col-sm-6">
-                          <label className="text-muted small text-uppercase mb-1">Price per Unit</label>
-                          <div className="fs-5 fw-medium text-success">₹{selectedItem.pricePerUnit}</div>
-                        </div>
-                        {selectedItem.season && (
-                          <div className="col-sm-6">
-                            <label className="text-muted small text-uppercase mb-1">Season</label>
-                            <div className="fs-5 fw-medium text-dark">{selectedItem.season}</div>
-                          </div>
-                        )}
+                        <button type="button" className="btn-close" onClick={closeDetails}></button>
+                      </div>
 
-                        {/* Action Buttons */}
-                        <div className="col-12 mt-4 pt-4 border-top">
-                          <div className="d-flex gap-2 mb-3">
+                      <div className="row g-4 mb-5">
+                        <div className="col-6">
+                          <label className="text-muted small text-uppercase fw-bold letter-spacing-1 mb-1">{modalType === 'listing' ? 'Producer' : 'Requestor'}</label>
+                          <div className="h5 fw-bold text-dark">{modalType === 'listing' ? selectedItem.farmerName : selectedItem.buyerName}</div>
+                        </div>
+                        <div className="col-6">
+                          <label className="text-muted small text-uppercase fw-bold letter-spacing-1 mb-1">Quantity</label>
+                          <div className="h5 fw-bold text-dark">{modalType === 'listing' ? selectedItem.quantity : selectedItem.requiredQuantity}</div>
+                        </div>
+                        <div className="col-12">
+                          <div className="p-3 bg-light rounded-4 border-white border">
+                            <label className="text-muted small text-uppercase fw-bold letter-spacing-1 mb-1">{modalType === 'listing' ? 'Price per Unit' : 'Target Price'}</label>
+                            <div className={`display-5 fw-bold ${modalType === 'listing' ? 'text-success' : 'text-warning-emphasis'}`}>₹{modalType === 'listing' ? selectedItem.pricePerUnit : selectedItem.targetPrice}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Interface */}
+                      <div className="pt-4 border-top">
+                        {modalType === 'listing' ? (
+                          <div className="d-flex flex-column gap-3">
                             {user && user.role !== 'Farmer' && (
-                              <>
-                                <button className="btn btn-success btn-lg rounded-pill flex-grow-1 shadow" onClick={handlePlaceOrder}>
-                                  <i className="bi bi-cart-plus me-2"></i> Place Order
-                                </button>
-                                {!showFarmerContact && (
-                                  <button className="btn btn-outline-success btn-lg rounded-pill flex-grow-1" onClick={handleContactSeller}>
-                                    <i className="bi bi-telephone me-2"></i> Contact Farmer
-                                  </button>
-                                )}
-                              </>
+                              <button className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow" onClick={handlePlaceOrder}>
+                                <i className="bi bi-cart-plus-fill me-2"></i> Purchase Now
+                              </button>
                             )}
-                            {!user && (
-                              <button className="btn btn-warning btn-lg rounded-pill w-100 shadow" onClick={() => onNavigate('login')}>
-                                <i className="bi bi-box-arrow-in-right me-2"></i> Login to Order
+                            {user && (
+                              <button className="btn btn-outline-dark btn-lg rounded-pill fw-bold py-3" onClick={handleContactSeller}>
+                                <i className="bi bi-person-lines-fill me-2"></i> {showFarmerContact ? 'Contact Shown Below' : 'Get Farmer Contact'}
                               </button>
                             )}
                           </div>
-
-                          {showFarmerContact && (
-                            <div className="bg-success bg-opacity-10 border border-success border-opacity-25 rounded-4 p-4 text-center fade-in mt-3">
-                              <h5 className="text-success fw-bold mb-3">Farmer Contact Details</h5>
-                              <div className="fs-5 mb-2"><i className="bi bi-person-badge text-muted me-2"></i> <strong>{selectedItem.farmerName}</strong></div>
-                              <div className="fs-4 fw-bold text-dark mb-2"><i className="bi bi-telephone-fill text-success me-2"></i> {selectedItem.farmerMobile}</div>
-                              <div className="fs-6 text-muted"><i className="bi bi-envelope-fill me-2"></i> {selectedItem.farmerEmail}</div>
-                              <a href={`tel:${selectedItem.farmerMobile}`} className="btn btn-success rounded-pill px-4 mt-3 shadow-sm mx-1">Call Now</a>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-
-                    {/* ORDER DETAILS */}
-                    {modalType === 'order' && (
-                      <>
-                        <div className="col-sm-6">
-                          <label className="text-muted small text-uppercase mb-1">Buyer Name</label>
-                          <div className="fs-5 fw-medium text-dark">{selectedItem.buyerName}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="text-muted small text-uppercase mb-1">Required Quantity</label>
-                          <div className="fs-5 fw-medium text-dark">{selectedItem.requiredQuantity}</div>
-                        </div>
-                        <div className="col-sm-6">
-                          <label className="text-muted small text-uppercase mb-1">Target Price per Unit</label>
-                          <div className="fs-5 fw-medium text-warning-emphasis">₹{selectedItem.targetPrice}</div>
-                        </div>
-
-                        {/* Farmer Contact Button */}
-                        <div className="col-12 mt-4 pt-4 border-top">
-                          {user && user.role === 'Farmer' && (
-                            <>
-                              {!contactByFarmer && (
-                                <button className="btn btn-warning btn-lg rounded-pill w-100 text-dark shadow" onClick={handleContactBuyer}>
-                                  <i className="bi bi-telephone me-2"></i> Contact Buyer
+                        ) : (
+                          <div className="d-flex flex-column gap-3">
+                            {user && user.role === 'Farmer' && selectedItem.status === 'PENDING' && (
+                              <button className="btn btn-warning btn-lg rounded-pill fw-bold py-3 shadow text-dark" onClick={handleOfferFulfillment}>
+                                <i className="bi bi-check-lg me-2"></i> Offer Fulfillment
+                              </button>
+                            )}
+                            
+                            {user && user.id === selectedItem.buyerId && selectedItem.status === 'FULFILLED' && (
+                              <div className="alert alert-info rounded-4 border-0 shadow-sm p-4 text-center">
+                                <h5 className="fw-bold mb-3">Fulfillment Offered!</h5>
+                                <p className="mb-4 text-muted">A farmer has offered to fulfill your requirement. Confirm once you receive the produce.</p>
+                                <button className="btn btn-success btn-lg rounded-pill fw-bold w-100 shadow-sm" onClick={handleAcceptFulfillment}>
+                                  <i className="bi bi-check2-all me-2"></i> Accept Fulfillment
                                 </button>
-                              )}
+                              </div>
+                            )}
 
-                              {contactByFarmer && (
-                                <div className="bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-4 p-4 text-center fade-in mt-3">
-                                  <h5 className="text-warning-emphasis fw-bold mb-3">Buyer Contact Details</h5>
-                                  <div className="fs-5 mb-2"><i className="bi bi-person-badge text-muted me-2"></i> <strong>{selectedItem.buyerName}</strong></div>
-                                  <div className="fs-4 fw-bold text-dark mb-2"><i className="bi bi-telephone-fill text-success me-2"></i> {selectedItem.buyerMobile}</div>
-                                  <div className="fs-6 text-muted"><i className="bi bi-envelope-fill me-2"></i> {selectedItem.buyerEmail}</div>
-                                  <a href={`tel:${selectedItem.buyerMobile}`} className="btn btn-warning rounded-pill px-4 mt-3 shadow-sm mx-1 text-dark">Call Now</a>
-                                </div>
-                              )}
-                            </>
-                          )}
-                          {user && user.role !== 'Farmer' && (
-                            <div className="alert alert-info mb-0">
-                              <i className="bi bi-info-circle me-2"></i> Only farmers can contact buyers for this demand
+                            {user && user.role === 'Farmer' && (
+                              <button className="btn btn-outline-dark btn-lg rounded-pill fw-bold py-3" onClick={handleContactBuyer}>
+                                <i className="bi bi-person-lines-fill me-2"></i> {contactByFarmer ? 'Contact Shown Below' : 'Get Buyer Contact'}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        
+                        {(showFarmerContact || contactByFarmer) && (
+                          <div className="mt-4 p-4 bg-dark text-white rounded-4 fade-in shadow-lg">
+                            <h5 className="fw-bold mb-3 border-bottom border-secondary pb-2">Direct Communications</h5>
+                            <div className="d-flex align-items-center gap-3 mb-3">
+                              <div className="bg-success p-2 rounded-circle"><i className="bi bi-telephone-fill"></i></div>
+                              <div className="fs-4 fw-bold">{modalType === 'listing' ? selectedItem.farmerMobile : selectedItem.buyerMobile}</div>
                             </div>
-                          )}
-                          {!user && (
-                            <button className="btn btn-warning btn-lg rounded-pill w-100 shadow text-dark" onClick={() => onNavigate('login')}>
-                              <i className="bi bi-box-arrow-in-right me-2"></i> Login to Contact
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
+                            <div className="text-secondary small mb-3">
+                              <i className="bi bi-envelope-fill me-2"></i> {modalType === 'listing' ? selectedItem.farmerEmail : selectedItem.buyerEmail}
+                            </div>
+                            <div className="d-flex gap-2">
+                              <a href={`tel:${modalType === 'listing' ? selectedItem.farmerMobile : selectedItem.buyerMobile}`} className="btn btn-success rounded-pill flex-grow-1 fw-bold">Call Now</a>
+                              <a href={`mailto:${modalType === 'listing' ? selectedItem.farmerEmail : selectedItem.buyerEmail}`} className="btn btn-outline-light rounded-pill px-4">Email</a>
+                            </div>
+                          </div>
+                        )}
+
+                        {!user && (
+                          <button className="btn btn-dark btn-lg rounded-pill w-100 fw-bold py-3 shadow" onClick={() => onNavigate('login')}>
+                            Join to Interact
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -47,6 +47,9 @@ public class User {
     @Size(max = 50)
     private String season;
 
+    @Size(max = 255)
+    private String profilePhoto;
+
     public Long getId() {
         return id;
     }
@@ -125,6 +128,14 @@ public class User {
 
     public void setSeason(String season) {
         this.season = season;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 }
 

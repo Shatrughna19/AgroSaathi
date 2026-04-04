@@ -181,4 +181,143 @@ public class MarketplaceService {
     public List<CropOrder> getOrdersByBuyerId(Long buyerId) {
         return cropOrderRepository.findAllByBuyerIdOrderByCreatedAtDesc(buyerId);
     }
+
+    public CropOrder updateCropOrderStatus(Long orderId, String status) {
+        CropOrder order = cropOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setStatus(status);
+        
+        // Notify buyer about status change
+        Notification notification = new Notification(
+            order.getBuyerId(),
+            order.getFarmerId(),
+            "System",
+            "",
+            "",
+            "Farmer",
+            "ORDER_STATUS_UPDATE",
+            "Your order for " + order.getCropName() + " has been " + status.toLowerCase(),
+            order.getCropName(),
+            order.getQuantity(),
+            order.getPrice()
+        );
+        notificationRepository.save(notification);
+        
+        return cropOrderRepository.save(order);
+    }
+
+    // Farmer accepts buyer's crop order (indicates willingness to fulfill buyer bid)
+    public CropOrder farmerAcceptCropOrder(Long orderId, Long farmerId) {
+        CropOrder order = cropOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (!order.getFarmerId().equals(farmerId)) {
+            throw new RuntimeException("Farmer mismatch");
+        }
+        order.setFarmerAccepted(true);
+
+        // Notify buyer that farmer accepted
+        Notification notification = new Notification(
+            order.getBuyerId(),
+            order.getFarmerId(),
+            "Farmer",
+            "",
+            "",
+            "Farmer",
+            "CROP_ORDER_FARMER_ACCEPTED",
+            "Farmer has accepted to fulfill your order for " + order.getCropName(),
+            order.getCropName(),
+            order.getQuantity(),
+            order.getPrice()
+        );
+        notificationRepository.save(notification);
+
+        return cropOrderRepository.save(order);
+    }
+
+    // Buyer accepts the farmer's acceptance (both parties agreed -> update status)
+    public CropOrder buyerAcceptCropOrder(Long orderId, Long buyerId) {
+        CropOrder order = cropOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (!order.getBuyerId().equals(buyerId)) {
+            throw new RuntimeException("Buyer mismatch");
+        }
+        order.setBuyerAccepted(true);
+
+        // If farmer already accepted, mark final status as ACCEPTED
+        if (Boolean.TRUE.equals(order.getFarmerAccepted())) {
+            order.setStatus("ACCEPTED");
+        }
+
+        // Notify farmer that buyer accepted
+        Notification notification = new Notification(
+            order.getFarmerId(),
+            order.getBuyerId(),
+            order.getBuyerName(),
+            order.getBuyerMobile(),
+            order.getBuyerEmail(),
+            "Buyer",
+            "CROP_ORDER_BUYER_ACCEPTED",
+            order.getBuyerName() + " accepted your offer to fulfill " + order.getCropName(),
+            order.getCropName(),
+            order.getQuantity(),
+            order.getPrice()
+        );
+        notificationRepository.save(notification);
+
+        return cropOrderRepository.save(order);
+    }
+
+    public BuyerOrder fulfillBuyerOrder(Long orderId, Long farmerId, String name, String mobile, String email) {
+        BuyerOrder order = buyerOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Requirement not found"));
+        
+        order.setStatus("FULFILLED");
+        order.setFulfilledByFarmerId(farmerId);
+        order.setFarmerName(name);
+        order.setFarmerMobile(mobile);
+        order.setFarmerEmail(email);
+        
+        // Notify buyer
+        Notification notification = new Notification(
+            order.getBuyerId(),
+            farmerId,
+            name,
+            mobile,
+            email,
+            "Farmer",
+            "REQUIREMENT_FULFILLED",
+            name + " has offered to fulfill your requirement for " + order.getCropName(),
+            order.getCropName(),
+            order.getRequiredQuantity(),
+            order.getTargetPrice()
+        );
+        notificationRepository.save(notification);
+        
+        return buyerOrderRepository.save(order);
+    }
+
+    public BuyerOrder acceptBuyerFulfillment(Long orderId) {
+        BuyerOrder order = buyerOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Requirement not found"));
+        
+        order.setStatus("ACCEPTED");
+        
+        // Notify farmer
+        Notification notification = new Notification(
+            order.getFulfilledByFarmerId(),
+            order.getBuyerId(),
+            order.getBuyerName(),
+            order.getBuyerMobile(),
+            order.getBuyerEmail(),
+            "Buyer",
+            "FULFILLMENT_ACCEPTED",
+            order.getBuyerName() + " accepted your fulfillment for " + order.getCropName(),
+            order.getCropName(),
+            order.getRequiredQuantity(),
+            order.getTargetPrice()
+        );
+        notificationRepository.save(notification);
+        
+        return buyerOrderRepository.save(order);
+    }
 }

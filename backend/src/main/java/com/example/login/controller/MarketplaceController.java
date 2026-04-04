@@ -205,4 +205,24 @@ public class MarketplaceController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    @PutMapping("/orders/crop/{id}/status")
+    public ResponseEntity<CropOrder> updateCropOrderStatus(@PathVariable Long id, @RequestParam String status) {
+        return ResponseEntity.ok(marketplaceService.updateCropOrderStatus(id, status));
+    }
+
+    @PutMapping("/orders/buyer/{id}/fulfill")
+    public ResponseEntity<BuyerOrder> fulfillBuyerOrder(
+            @PathVariable Long id, 
+            @RequestParam Long farmerId,
+            @RequestParam String farmerName,
+            @RequestParam String farmerMobile,
+            @RequestParam String farmerEmail) {
+        return ResponseEntity.ok(marketplaceService.fulfillBuyerOrder(id, farmerId, farmerName, farmerMobile, farmerEmail));
+    }
+
+    @PutMapping("/orders/buyer/{id}/accept-fulfillment")
+    public ResponseEntity<BuyerOrder> acceptBuyerFulfillment(@PathVariable Long id) {
+        return ResponseEntity.ok(marketplaceService.acceptBuyerFulfillment(id));
+    }
 }

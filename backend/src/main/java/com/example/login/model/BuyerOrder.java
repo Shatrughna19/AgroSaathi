@@ -20,6 +20,11 @@ public class BuyerOrder {
     private String cropName;
     private String requiredQuantity;
     private Double targetPrice;
+    private String status = "PENDING"; // PENDING, FULFILLED, ACCEPTED, COMPLETED
+    private Long fulfilledByFarmerId;
+    private String farmerName;
+    private String farmerMobile;
+    private String farmerEmail;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Long getId() {
@@ -84,6 +89,46 @@ public class BuyerOrder {
 
     public void setTargetPrice(Double targetPrice) {
         this.targetPrice = targetPrice;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getFulfilledByFarmerId() {
+        return fulfilledByFarmerId;
+    }
+
+    public void setFulfilledByFarmerId(Long fulfilledByFarmerId) {
+        this.fulfilledByFarmerId = fulfilledByFarmerId;
+    }
+
+    public String getFarmerName() {
+        return farmerName;
+    }
+
+    public void setFarmerName(String farmerName) {
+        this.farmerName = farmerName;
+    }
+
+    public String getFarmerMobile() {
+        return farmerMobile;
+    }
+
+    public void setFarmerMobile(String farmerMobile) {
+        this.farmerMobile = farmerMobile;
+    }
+
+    public String getFarmerEmail() {
+        return farmerEmail;
+    }
+
+    public void setFarmerEmail(String farmerEmail) {
+        this.farmerEmail = farmerEmail;
     }
 
     public LocalDateTime getCreatedAt() {

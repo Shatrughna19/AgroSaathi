@@ -3,7 +3,7 @@ import './App.css'
 import Register from './Register.jsx'
 import Login from './Login.jsx'
 import Marketplace from './Marketplace.jsx'
-import Header from './Header.jsx'
+import Sidebar from './Sidebar.jsx'
 import Profile from './Profile.jsx'
 import OrdersSection from './OrdersSection.jsx'
 import FertilizerSection from './FertilizerSection.jsx'
@@ -19,7 +19,6 @@ function App() {
   const handleLoginSuccess = (userData) => {
     sessionStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
-    // Go to profile immediately on login
     setActivePage('profile')
   }
 
@@ -55,14 +54,20 @@ function App() {
       }
     }
 
-    // Default: Return the pure marketplace directly as an e-commerce landing page
     return <Marketplace user={user} onNavigate={setActivePage} />
   }
 
   return (
-    <div className="app-root">
-      <Header activePage={activePage} onNavigate={setActivePage} user={user} />
-      {renderContent()}
+    <div className="app-shell">
+      <Sidebar 
+        activePage={activePage} 
+        onNavigate={setActivePage} 
+        user={user} 
+        onLogout={handleLogout} 
+      />
+      <main className="main-content">
+        {renderContent()}
+      </main>
     </div>
   )
 }
