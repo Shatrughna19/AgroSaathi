@@ -6,5 +6,7 @@ import java.util.List;
 
 public interface CropListingRepository extends JpaRepository<CropListing, Long> {
     List<CropListing> findAllByOrderByCreatedAtDesc();
+    List<CropListing> findAllByIsSoldFalseOrderByCreatedAtDesc();
+    List<CropListing> findAllByIsSoldFalseAndVerificationStatusOrderByCreatedAtDesc(String status);
     List<CropListing> findAllByFarmerIdOrderByCreatedAtDesc(Long farmerId);
 }

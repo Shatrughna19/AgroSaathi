@@ -23,6 +23,10 @@ public class CropListing {
     private String imageUrl;
     private String season;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private String verificationStatus = "UNVERIFIED"; // UNVERIFIED, VERIFIED, REJECTED
+    private String grade;
+    private String adminFeedback;
+    private Boolean isSold = false; // Track availability
 
     public Long getId() {
         return id;
@@ -110,5 +114,37 @@ public class CropListing {
 
     public void setSeason(String season) {
         this.season = season;
+    }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
+    }
+
+    public String getAdminFeedback() {
+        return adminFeedback;
+    }
+
+    public void setAdminFeedback(String adminFeedback) {
+        this.adminFeedback = adminFeedback;
+    }
+
+    public Boolean getIsSold() {
+        return isSold;
+    }
+
+    public void setIsSold(Boolean sold) {
+        isSold = sold;
     }
 }

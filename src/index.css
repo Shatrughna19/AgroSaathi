@@ -1,13 +1,10 @@
+/* index.css — base resets only; App.css handles the design system */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #fcefe3; 
-  color: #333333;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  color: #2b4b29; 
 }

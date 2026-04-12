@@ -25,6 +25,11 @@ public class BuyerOrder {
     private String farmerName;
     private String farmerMobile;
     private String farmerEmail;
+    private Boolean partialPaymentDone = false;
+    private Boolean fullPaymentDone = false;
+    private Double amountPaid = 0.0;
+    private String contractHash;
+    private Long contractId;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Long getId() {
@@ -138,4 +143,19 @@ public class BuyerOrder {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public Boolean getPartialPaymentDone() { return partialPaymentDone; }
+    public void setPartialPaymentDone(Boolean partialPaymentDone) { this.partialPaymentDone = partialPaymentDone; }
+
+    public Boolean getFullPaymentDone() { return fullPaymentDone; }
+    public void setFullPaymentDone(Boolean fullPaymentDone) { this.fullPaymentDone = fullPaymentDone; }
+
+    public Double getAmountPaid() { return amountPaid; }
+    public void setAmountPaid(Double amountPaid) { this.amountPaid = amountPaid; }
+
+    public String getContractHash() { return contractHash; }
+    public void setContractHash(String contractHash) { this.contractHash = contractHash; }
+
+    public Long getContractId() { return contractId; }
+    public void setContractId(Long contractId) { this.contractId = contractId; }
 }

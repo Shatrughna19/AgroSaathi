@@ -7,17 +7,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:5173") // Vite default port
+@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    private Map<String, Object> buildUserMap(User user) {
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", user.getId());
+        userMap.put("name", user.getName());
+        userMap.put("mobile", user.getMobile());
+        userMap.put("email", user.getEmail());
+        userMap.put("aadharno", user.getAadharno());
+        userMap.put("role", user.getRole());
+        userMap.put("address", user.getAddress());
+        userMap.put("cropsGrown", user.getCropsGrown());
+        userMap.put("season", user.getSeason());
+        userMap.put("profilePhoto", user.getProfilePhoto());
+        userMap.put("verificationStatus", user.getVerificationStatus());
+        userMap.put("bankAccountNumber", user.getBankAccountNumber());
+        userMap.put("bankIfscCode", user.getBankIfscCode());
+        userMap.put("bankName", user.getBankName());
+        userMap.put("bankAccountHolderName", user.getBankAccountHolderName());
+        return userMap;
     }
 
     @PostMapping("/register")
@@ -36,43 +57,20 @@ public class UserController {
         private String aadharno;
         private String password;
 
-        public String getAadharno() {
-            return aadharno;
-        }
-
-        public void setAadharno(String aadharno) {
-            this.aadharno = aadharno;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
+        public String getAadharno() { return aadharno; }
+        public void setAadharno(String aadharno) { this.aadharno = aadharno; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             User user = userService.loginWithAadhar(loginRequest.getAadharno(), loginRequest.getPassword());
-            
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("id", user.getId());
-            userMap.put("name", user.getName());
-            userMap.put("mobile", user.getMobile());
-            userMap.put("email", user.getEmail());
-            userMap.put("aadharno", user.getAadharno());
-            userMap.put("role", user.getRole());
-            userMap.put("address", user.getAddress());
-            userMap.put("cropsGrown", user.getCropsGrown());
-            userMap.put("season", user.getSeason());
-            userMap.put("profilePhoto", user.getProfilePhoto());
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful");
-            response.put("user", userMap);
+            response.put("user", buildUserMap(user));
 
             return ResponseEntity.ok(response);
         } catch (RuntimeException ex) {
@@ -86,22 +84,10 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         try {
             User user = userService.updateUser(id, updatedUser);
-            
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("id", user.getId());
-            userMap.put("name", user.getName());
-            userMap.put("mobile", user.getMobile());
-            userMap.put("email", user.getEmail());
-            userMap.put("aadharno", user.getAadharno());
-            userMap.put("role", user.getRole());
-            userMap.put("address", user.getAddress());
-            userMap.put("cropsGrown", user.getCropsGrown());
-            userMap.put("season", user.getSeason());
-            userMap.put("profilePhoto", user.getProfilePhoto());
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Profile updated successfully");
-            response.put("user", userMap);
+            response.put("user", buildUserMap(user));
 
             return ResponseEntity.ok(response);
         } catch (RuntimeException ex) {
@@ -115,23 +101,46 @@ public class UserController {
     public ResponseEntity<?> uploadPhoto(@PathVariable Long id, @RequestPart(value = "image") MultipartFile image) {
         try {
             User user = userService.uploadProfilePhoto(id, image);
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("id", user.getId());
-            userMap.put("name", user.getName());
-            userMap.put("mobile", user.getMobile());
-            userMap.put("email", user.getEmail());
-            userMap.put("aadharno", user.getAadharno());
-            userMap.put("role", user.getRole());
-            userMap.put("address", user.getAddress());
-            userMap.put("cropsGrown", user.getCropsGrown());
-            userMap.put("season", user.getSeason());
-            userMap.put("profilePhoto", user.getProfilePhoto());
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Profile photo updated successfully");
-            response.put("user", userMap);
+            response.put("user", buildUserMap(user));
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // ─── Admin User Management Endpoints ───────────────────────────────
+
+    @GetMapping("")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
+            return ResponseEntity.ok(buildUserMap(user));
+        } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PutMapping("/{id}/verification")
+    public ResponseEntity<?> updateVerificationStatus(@PathVariable Long id, @RequestParam String status) {
+        try {
+            User user = userService.updateVerificationStatus(id, status);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Verification status updated to " + status);
+            response.put("user", buildUserMap(user));
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
             Map<String, String> error = new HashMap<>();
             error.put("message", ex.getMessage());
             return ResponseEntity.badRequest().body(error);

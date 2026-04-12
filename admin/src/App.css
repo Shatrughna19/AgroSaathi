@@ -1,128 +1,205 @@
-.admin-header {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+:root {
+  /* Color Palette - Deep Agrarian Theme */
+  --primary: #154212;
+  --primary-light: #eff6e9;
+  --accent: #20c997;
+  --surface: #ffffff;
+  --background: #f8fafc;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --error: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  
+  --grad-emerald: linear-gradient(135deg, #154212 0%, #22c55e 100%);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 20px -2px rgba(21, 66, 18, 0.12);
+  --glass: rgba(255, 255, 255, 0.85);
+  --glass-blur: blur(12px);
 }
 
-.admin-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: white;
+body {
+  font-family: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
   margin: 0;
-}
-
-.admin-subtitle {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-}
-
-.admin-nav-btn {
-  color: white;
-  border-color: rgba(255, 255, 255, 0.5);
-  transition: all 0.3s ease;
-}
-
-.admin-nav-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: white;
-  color: white;
-}
-
-.admin-nav-btn.active {
-  background-color: white;
-  color: #28a745;
-  border-color: white;
-}
-
-.auth-card {
-  max-width: 450px;
-  border-radius: 1rem;
-  background: white;
-  border: none;
-}
-
-.admin-input {
-  border-radius: 0.5rem;
-  border: 2px solid #e0e0e0;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.admin-input:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-.admin-btn {
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.admin-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.dashboard-hero {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  border-radius: 1rem;
-  margin-bottom: 2rem;
-}
-
-.crop-card {
-  border: 2px solid #e0e0e0;
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-  background: white;
-}
-
-.crop-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-color: #28a745;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-verified {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-rejected {
-  background-color: #f8d7da;
-  color: #721c24;
+  -webkit-font-smoothing: antialiased;
 }
 
 .fade-in {
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.page-background {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f0f0f0 100%);
-  padding: 2rem 0;
+/* Header & Navigation */
+.admin-header {
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 1.25rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.admin-title {
+  color: var(--primary);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 1.75rem;
+}
+
+.admin-nav-btn {
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 50px;
+  padding: 0.5rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.admin-nav-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.admin-nav-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Dashboard Hero */
+.dashboard-hero {
+  background: var(--grad-emerald);
+  border-radius: 2rem;
+  padding: 3rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 3rem;
+}
+
+.dashboard-hero::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.dashboard-hero h2 {
+  font-weight: 800;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Cards */
+.stat-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.crop-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-sm);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crop-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.1);
+}
+
+.crop-title {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+.admin-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.admin-btn:hover {
+  background: #0d2a0b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px -5px rgba(21, 66, 18, 0.4);
+}
+
+.btn-outline-custom {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+}
+
+/* Badges */
+.status-badge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-block;
+}
+
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-verified { background: #dcfce7; color: #166534; }
+.status-rejected { background: #fee2e2; color: #991b1b; }
+
+/* Form Elements */
+.admin-input {
+  background: #f1f5f9;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.admin-input:focus {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(21, 66, 18, 0.1);
+  outline: none;
+}
+
+.verification-modal-content {
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 2rem;
+  border: 1px solid rgba(255,255,255,0.3);
 }

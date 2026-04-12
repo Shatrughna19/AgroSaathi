@@ -18,6 +18,8 @@ public class CropVerificationController {
 
     @Autowired
     private CropVerificationService cropVerificationService;
+    @Autowired
+    private com.example.login.repository.CropListingRepository cropListingRepository;
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyCrop(@RequestBody Map<String, String> request) {
@@ -26,6 +28,7 @@ public class CropVerificationController {
             String officerId = request.get("officerId");
             String status = request.get("status");
             String feedback = request.get("feedback");
+            String grade = request.get("grade");
             String surveyerName = request.get("surveyerName");
 
             // Validation
@@ -45,8 +48,22 @@ public class CropVerificationController {
             }
 
             CropVerification verification = cropVerificationService.verifyListing(
-                    cropListingId, officerId, status, feedback != null ? feedback : "", surveyerName != null ? surveyerName : ""
+                    cropListingId, officerId, status, feedback != null ? feedback : "", surveyerName != null ? surveyerName : "", grade
             );
+
+            // Update the CropListing verification fields as well
+            try {
+                com.example.login.model.CropListing listing = cropListingRepository.findById(cropListingId).orElse(null);
+                if (listing != null) {
+                    listing.setVerificationStatus(status);
+                    listing.setGrade(grade);
+                    listing.setAdminFeedback(feedback != null ? feedback : "");
+                    cropListingRepository.save(listing);
+                }
+            } catch (Exception e) {
+                // non-fatal: we still return success for verification record but log
+                e.printStackTrace();
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Verification submitted successfully");

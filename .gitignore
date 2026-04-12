@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Uploaded images (Farmer uploads, etc.)
+backend/uploads/
+
+# Backend build artifacts
+backend/target/
+backend/.mvn/
+!backend/.mvn/wrapper/maven-wrapper.properties

@@ -50,6 +50,14 @@ public class User {
     @Size(max = 255)
     private String profilePhoto;
 
+    private String verificationStatus = "PENDING"; // PENDING, VERIFIED, REJECTED
+
+    // Bank details (for farmers to receive payments)
+    private String bankAccountNumber;
+    private String bankIfscCode;
+    private String bankName;
+    private String bankAccountHolderName;
+
     public Long getId() {
         return id;
     }
@@ -137,5 +145,25 @@ public class User {
     public void setProfilePhoto(String profilePhoto) {
         this.profilePhoto = profilePhoto;
     }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public String getBankAccountNumber() { return bankAccountNumber; }
+    public void setBankAccountNumber(String bankAccountNumber) { this.bankAccountNumber = bankAccountNumber; }
+
+    public String getBankIfscCode() { return bankIfscCode; }
+    public void setBankIfscCode(String bankIfscCode) { this.bankIfscCode = bankIfscCode; }
+
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
+
+    public String getBankAccountHolderName() { return bankAccountHolderName; }
+    public void setBankAccountHolderName(String bankAccountHolderName) { this.bankAccountHolderName = bankAccountHolderName; }
 }
 

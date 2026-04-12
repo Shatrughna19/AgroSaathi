@@ -7,30 +7,29 @@ function Profile({ user, onLogout, onUpdate }) {
   if (!user) return null
 
   const [activeTab, setActiveTab] = useState('details') // 'details', 'manage'
-  
-  // Profile Edit states
   const [isEditing, setIsEditing] = useState(false)
+  const [scrollToBankOnEdit, setScrollToBankOnEdit] = useState(false)
   const [formData, setFormData] = useState({
     name: user.name || '',
     mobile: user.mobile || '',
     address: user.address || '',
     cropsGrown: user.cropsGrown || '',
-    season: user.season || ''
+    season: user.season || '',
+    bankAccountNumber: user.bankAccountNumber || '',
+    bankIfscCode: user.bankIfscCode || '',
+    bankName: user.bankName || '',
+    bankAccountHolderName: user.bankAccountHolderName || ''
   })
   const [profileImageFile, setProfileImageFile] = useState(null)
-
-  // Marketplace states
   const [myItems, setMyItems] = useState([])
   const [loadingItems, setLoadingItems] = useState(false)
   
-  // Forms
+  // Creation Forms
   const [listingForm, setListingForm] = useState({ cropName: 'Rice', season: 'Kharif (Monsoon)', quantity: '', pricePerUnit: '', image: null })
   const [orderForm, setOrderForm] = useState({ cropName: 'Rice', requiredQuantity: '', targetPrice: '' })
   const [fertForm, setFertForm] = useState({ fertilizerName: '', description: '', price: '', location: '', image: null })
 
   const API_BASE = 'http://localhost:8081/api'
-
-  // Options
   const cropOptions = ['Rice', 'Wheat', 'Mango', 'Cashew', 'Coconut', 'Sugarcane', 'Millets', 'Vegetables (Assorted)']
   const seasonOptions = ['Kharif (Monsoon)', 'Rabi (Winter)', 'Zaid (Summer)', 'Year-round']
 
@@ -44,29 +43,17 @@ function Profile({ user, onLogout, onUpdate }) {
     setLoadingItems(true)
     try {
       let url;
-      if (user.role === 'Farmer') {
-        url = `${API_BASE}/marketplace/listings/farmer/${user.id}`;
-      } else if (user.role === 'Shop Owner') {
-        url = `${API_BASE}/marketplace/fertilizers/shop/${user.id}`;
-      } else {
-        url = `${API_BASE}/marketplace/orders/buyer/${user.id}`;
-      }
+      if (user.role === 'Farmer') url = `${API_BASE}/marketplace/listings/farmer/${user.id}`;
+      else if (user.role === 'Shop Owner') url = `${API_BASE}/marketplace/fertilizers/shop/${user.id}`;
+      else url = `${API_BASE}/marketplace/orders/buyer/${user.id}`;
       
       const res = await fetch(url)
-      if (res.ok) {
-        let items = await res.json()
-        setMyItems(items)
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoadingItems(false)
-    }
+      if (res.ok) setMyItems(await res.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingItems(false) }
   }
 
-  const handleProfileChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+  const handleProfileChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
 
   const handleSaveProfile = async () => {
     try {
@@ -79,17 +66,27 @@ function Profile({ user, onLogout, onUpdate }) {
         const data = await res.json()
         onUpdate(data.user)
         setIsEditing(false)
+        setScrollToBankOnEdit(false)
         alert('Profile updated successfully!')
-      } else {
-        const err = await res.json()
-        alert(err.message || 'Error updating profile')
       }
-    } catch (error) {
-      alert('Network error')
-    }
+    } catch (error) { alert('Network error') }
   }
 
-  // Listing / Order / Fertilizer handlers
+  const handleEditBankDetails = () => {
+    setIsEditing(true)
+    setScrollToBankOnEdit(true)
+  }
+
+  // Scroll to bank section after entering edit mode
+  useEffect(() => {
+    if (isEditing && scrollToBankOnEdit) {
+      setTimeout(() => {
+        const el = document.getElementById('bank-details-section')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [isEditing, scrollToBankOnEdit])
+
   const handleFormChange = (e, formType) => {
     const { name, value, files } = e.target
     if (formType === 'listing') {
@@ -105,485 +102,497 @@ function Profile({ user, onLogout, onUpdate }) {
 
   const handleCreateListing = async (e) => {
     e.preventDefault()
-    
     const payload = {
-      farmerId: user.id,
-      farmerName: user.name,
-      farmerMobile: user.mobile,
-      farmerEmail: user.email,
-      cropName: listingForm.cropName,
-      season: listingForm.season,
-      quantity: listingForm.quantity,
-      pricePerUnit: parseFloat(listingForm.pricePerUnit)
+      farmerId: user.id, farmerName: user.name, farmerMobile: user.mobile, farmerEmail: user.email,
+      cropName: listingForm.cropName, season: listingForm.season, quantity: listingForm.quantity, pricePerUnit: parseFloat(listingForm.pricePerUnit)
     }
-
     const mFormData = new FormData();
     mFormData.append("listing", JSON.stringify(payload));
     if (listingForm.image) mFormData.append("image", listingForm.image);
 
     try {
-      const res = await fetch(`${API_BASE}/marketplace/listings`, {
-        method: 'POST', body: mFormData
-      })
+      const res = await fetch(`${API_BASE}/marketplace/listings`, { method: 'POST', body: mFormData })
       if (res.ok) {
-        const newListing = await res.json()
-        setMyItems([newListing, ...myItems])
+        setMyItems([await res.json(), ...myItems])
         setListingForm({ cropName: 'Rice', season: 'Kharif (Monsoon)', quantity: '', pricePerUnit: '', image: null })
-        const fileInput = document.getElementById('imageInput')
-        if(fileInput) fileInput.value = ''
         alert('Crop listed successfully!')
-      } else {
-        alert('Failed to list crop. Please try again.')
       }
-    } catch (error) {
-      alert('Network error')
-    }
+    } catch (e) { alert('Error listing crop') }
   }
 
   const handleCreateOrder = async (e) => {
     e.preventDefault()
-
     const payload = {
-      buyerId: user.id,
-      buyerName: user.name,
-      buyerMobile: user.mobile,
-      buyerEmail: user.email,
-      cropName: orderForm.cropName,
-      requiredQuantity: orderForm.requiredQuantity,
-      targetPrice: parseFloat(orderForm.targetPrice)
+      buyerId: user.id, buyerName: user.name, buyerMobile: user.mobile, buyerEmail: user.email,
+      cropName: orderForm.cropName, requiredQuantity: orderForm.requiredQuantity, targetPrice: parseFloat(orderForm.targetPrice)
     }
-
     try {
       const res = await fetch(`${API_BASE}/marketplace/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
       })
       if (res.ok) {
-        const newOrder = await res.json()
-        setMyItems([newOrder, ...myItems])
+        setMyItems([await res.json(), ...myItems])
         setOrderForm({ cropName: 'Rice', requiredQuantity: '', targetPrice: '' })
-        alert('Order placed successfully!')
-      } else {
-        alert('Failed to place order')
+        alert('Demand posted successfully!')
       }
-    } catch (error) {
-      alert('Network error')
-    }
+    } catch (e) { alert('Error posting demand') }
   }
 
   const handleCreateFertilizer = async (e) => {
     e.preventDefault()
-
     const payload = {
-      shopOwnerId: user.id,
-      shopOwnerName: user.name,
-      shopOwnerMobile: user.mobile,
-      shopOwnerEmail: user.email,
-      fertilizerName: fertForm.fertilizerName,
-      description: fertForm.description,
-      location: fertForm.location,
-      price: parseFloat(fertForm.price)
+      shopOwnerId: user.id, shopOwnerName: user.name, shopOwnerMobile: user.mobile, shopOwnerEmail: user.email,
+      fertilizerName: fertForm.fertilizerName, description: fertForm.description, location: fertForm.location, price: parseFloat(fertForm.price)
     }
-
     const mFormData = new FormData();
     mFormData.append("listing", JSON.stringify(payload));
     if (fertForm.image) mFormData.append("image", fertForm.image);
 
     try {
-      const res = await fetch(`${API_BASE}/marketplace/fertilizers`, {
-        method: 'POST', body: mFormData
-      })
+      const res = await fetch(`${API_BASE}/marketplace/fertilizers`, { method: 'POST', body: mFormData })
       if (res.ok) {
-        const newFert = await res.json()
-        setMyItems([newFert, ...myItems])
+        setMyItems([await res.json(), ...myItems])
         setFertForm({ fertilizerName: '', description: '', price: '', location: '', image: null })
-        const fileInput = document.getElementById('fertImageInput')
-        if(fileInput) fileInput.value = ''
-        alert('Fertilizer listed successfully for enquiries!')
-      } else {
-        alert('Failed to add fertilizer')
+        alert('Fertilizer added!')
       }
-    } catch (error) {
-      alert('Network error')
-    }
+    } catch (e) { alert('Error adding fertilizer') }
   }
 
+  const getRoleTheme = () => {
+    if (user.role === 'Farmer') return { class: 'emerald', icon: 'bi-flower2' }
+    if (user.role === 'Shop Owner') return { class: 'indigo', icon: 'bi-shop' }
+    return { class: 'amber', icon: 'bi-megaphone' }
+  }
+
+  const theme = getRoleTheme()
+
   return (
-    <div className="page-background fade-in">
-      <div className="container py-5">
-        <div className="row justify-content-center">
-          
-          <div className="col-12 col-lg-3 mb-4">
-            <div className={`card shadow-sm rounded-4 border-0 h-100 border-top ${user.role === 'Shop Owner' ? 'border-primary' : 'border-success'} border-4`}>
-              <div className="card-body p-4 text-center">
-                <div style={{ width: '88px', height: '88px', margin: '0 auto' }}>
+    <div className="fade-in-up">
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 fade-in-up">
+        <div>
+          <h2 className="text-4xl font-extrabold text-primary tracking-tight">My Dashboard</h2>
+          <p className="text-on-surface-variant mt-2 text-lg">Manage your profile and agricultural business activities.</p>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        {/* Profile Sidebar Card */}
+        <div className="xl:col-span-4">
+          <div className="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-stone-100 h-full flex flex-col">
+            <div className="text-center mb-5">
+              <div className="position-relative d-inline-block mb-4">
+                <div style={{ width: '120px', height: '120px' }}>
                   {user.profilePhoto ? (
-                    <img src={`http://localhost:8081${user.profilePhoto}`} alt="Profile" className="rounded-circle shadow" style={{ width: '88px', height: '88px', objectFit: 'cover' }} />
+                    <img src={`http://localhost:8081${user.profilePhoto}`} alt="Profile" className="rounded-circle shadow-lg w-100 h-100 object-fit-cover border border-4 border-white" />
                   ) : (
-                    <div className={`${user.role === 'Shop Owner' ? 'bg-primary' : 'bg-success'} text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow`} style={{ width: '88px', height: '88px', fontSize: '2rem' }}>
-                      <i className={user.role === 'Shop Owner' ? 'bi bi-shop' : 'bi bi-person-fill'}></i>
+                    <div className={`icon-box-modern icon-box-${theme.class} rounded-circle w-100 h-100 fs-1 shadow-sm`}>
+                      <i className={`bi ${theme.icon}`}></i>
                     </div>
                   )}
                 </div>
-                <div className="mt-2 mb-3">
-                  <input id="profilePhotoInput" type="file" accept="image/*" className="d-none" onChange={(e) => setProfileImageFile(e.target.files[0])} />
-                  <div className="d-flex gap-2 justify-content-center">
-                    <button className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => document.getElementById('profilePhotoInput').click()}>Change Photo</button>
-                    <button className="btn btn-sm btn-success rounded-pill" onClick={async () => {
-                      if (!profileImageFile) { alert('Please choose an image first'); return }
-                      const form = new FormData(); form.append('image', profileImageFile)
-                      try {
-                        const res = await fetch(`http://localhost:8081/api/users/${user.id}/photo`, { method: 'PUT', body: form })
-                        if (res.ok) {
-                          const data = await res.json()
-                          if (data.user) {
-                            onUpdate(data.user)
-                            alert('Profile photo updated')
-                          }
-                        } else {
-                          const err = await res.json(); alert(err.message || 'Failed to upload')
-                        }
-                      } catch (e) { alert('Network error') }
-                    }}>Upload</button>
-                  </div>
-                </div>
-                <h4 className="fw-bold text-dark">{user.name}</h4>
-                <p className={`text-muted small badge ${user.role === 'Shop Owner' ? 'bg-primary-subtle text-primary border-primary' : 'bg-success-subtle text-success border-success'} border px-3 py-2 rounded-pill mt-2`}>
-                  {user.role} Account
-                </p>
-                
-                <hr className="my-4" />
-                
-                <div className="d-flex flex-column gap-2 text-start">
-                  <button 
-                    className={`btn text-start px-3 py-2 fw-medium rounded-pill ${activeTab === 'details' ? (user.role === 'Shop Owner' ? 'btn-primary text-white shadow-sm' : 'btn-success shadow-sm') : 'btn-light'}`}
-                    onClick={() => setActiveTab('details')}
-                  >
-                    <i className="bi bi-person-lines-fill me-2"></i> My Profile Info
-                  </button>
-                  <button 
-                    className={`btn text-start px-3 py-2 fw-medium rounded-pill ${activeTab === 'manage' ? (user.role === 'Shop Owner' ? 'btn-primary text-white shadow-sm' : 'btn-success shadow-sm') : 'btn-light'}`}
-                    onClick={() => setActiveTab('manage')}
-                  >
-                    <i className={`bi ${user.role === 'Shop Owner' ? 'bi-flower3' : user.role === 'Farmer' ? 'bi-tags-fill' : 'bi-bag-check-fill'} me-2`}></i> 
-                    {user.role === 'Shop Owner' ? 'Manage Fertilizers' : user.role === 'Farmer' ? 'Manage Listings' : 'Manage Demands'}
-                  </button>
-                  
-                  <button type="button" className="btn btn-outline-danger mt-4 rounded-pill fw-bold" onClick={onLogout}>
-                    <i className="bi bi-box-arrow-left me-2"></i> Logout
-                  </button>
-                </div>
+                <button 
+                  className="btn-modern btn-modern-primary position-absolute bottom-0 end-0 p-2 rounded-circle shadow"
+                  style={{ width: '36px', height: '36px' }}
+                  onClick={() => document.getElementById('profilePhotoInput').click()}
+                >
+                  <i className="bi bi-camera-fill" style={{ fontSize: '0.8rem' }}></i>
+                </button>
+                <input id="profilePhotoInput" type="file" accept="image/*" className="d-none" onChange={async (e) => {
+                  const file = e.target.files[0]
+                  if (!file) return
+                  const form = new FormData(); form.append('image', file)
+                  try {
+                    const res = await fetch(`http://localhost:8081/api/users/${user.id}/photo`, { method: 'PUT', body: form })
+                    if (res.ok) {
+                      const data = await res.json()
+                      if (data.user) onUpdate(data.user)
+                    }
+                  } catch (e) { alert('Upload failed') }
+                }} />
               </div>
+              <h3 className="fw-bold text-slate-900 mb-1">{user.name}</h3>
+              <p className="text-slate-500 small mb-4">{user.email}</p>
+              <span className={`badge-modern badge-${theme.class === 'emerald' ? 'success' : theme.class === 'indigo' ? 'info' : 'warning'}-modern`}>
+                {user.role} Account
+              </span>
+            </div>
+
+            <div className="nav-group mb-5">
+              <button className={`nav-item ${activeTab === 'details' ? 'active' : ''}`} onClick={() => setActiveTab('details')}>
+                <i className="bi bi-person-circle"></i> <span>Profile Information</span>
+              </button>
+              <button className={`nav-item ${activeTab === 'manage' ? 'active' : ''}`} onClick={() => setActiveTab('manage')}>
+                <i className={`bi ${theme.icon}`}></i> 
+                <span>{user.role === 'Shop Owner' ? 'Inventory Store' : user.role === 'Farmer' ? 'My Crop Listings' : 'My Demand Postings'}</span>
+              </button>
+            </div>
+
+            <div className="sidebar-footer pt-4 mt-auto">
+              <button onClick={onLogout} className="btn-modern btn-modern-outline w-100 text-danger border-danger-subtle">
+                <i className="bi bi-box-arrow-left"></i> Logout Securely
+              </button>
             </div>
           </div>
+        </div>
 
-          <div className="col-12 col-lg-9">
-            {activeTab === 'details' && (
-              <div className="profile-card shadow-lg rounded-4 p-4 p-md-5 w-100">
-                <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-                  <h3 className="mb-0 text-dark fw-bold">Personal Information</h3>
-                  {!isEditing && (
-                    <button className="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3" onClick={() => setIsEditing(true)}>
-                      <i className="bi bi-pencil-square me-1"></i> Edit Details
-                    </button>
+        {/* Content Area */}
+        <div className="xl:col-span-8">
+          {activeTab === 'details' && (
+            <div className="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-stone-100 fade-in">
+              <div className="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-slate-100">
+                <h4 className="fw-bold text-slate-900 mb-0">Personal Information</h4>
+                {!isEditing && (
+                  <button className="btn-modern btn-modern-outline btn-sm" onClick={() => { setScrollToBankOnEdit(false); setIsEditing(true) }}>
+                    <i className="bi bi-pencil-square"></i> Edit
+                  </button>
+                )}
+              </div>
+
+              {isEditing ? (
+                <div className="row g-4">
+                  <div className="col-md-6 form-group-modern">
+                    <label className="label-modern">Full Name</label>
+                    <input type="text" className="input-modern" name="name" value={formData.name} onChange={handleProfileChange} />
+                  </div>
+                  <div className="col-md-6 form-group-modern">
+                    <label className="label-modern">Mobile Number</label>
+                    <input type="text" className="input-modern" name="mobile" value={formData.mobile} onChange={handleProfileChange} />
+                  </div>
+                  <div className="col-12 form-group-modern">
+                    <label className="label-modern">Address / Operation Base</label>
+                    <textarea className="input-modern textarea-modern" name="address" value={formData.address} onChange={handleProfileChange}></textarea>
+                  </div>
+                  {user.role === 'Farmer' && (
+                    <>
+                      <div className="col-md-6 form-group-modern">
+                        <label className="label-modern">Crops Typically Grown</label>
+                        <input type="text" className="input-modern" name="cropsGrown" value={formData.cropsGrown} onChange={handleProfileChange} />
+                      </div>
+                      <div className="col-md-6 form-group-modern">
+                        <label className="label-modern">Dominant Season</label>
+                        <input type="text" className="input-modern" name="season" value={formData.season} onChange={handleProfileChange} />
+                      </div>
+
+                      {/* Bank Details Section */}
+                      <div className="col-12 mt-3" id="bank-details-section">
+                        <div className="p-4 rounded-4 border" style={{background: 'linear-gradient(135deg, #ecfdf5, #f0fdf4)', borderColor: '#a7f3d0'}}>
+                          <div className="d-flex align-items-center gap-2 mb-3">
+                            <i className="bi bi-bank2 text-emerald-600 fs-5"></i>
+                            <h5 className="fw-bold text-emerald-800 mb-0">Bank Details</h5>
+                            <span className="badge bg-amber-100 text-amber-700 rounded-pill px-2 py-1 small ms-2" style={{backgroundColor: '#fef3c7', color: '#92400e'}}>Required for payments</span>
+                          </div>
+                          <p className="text-slate-500 small mb-3">Buyers will see these details when paying for your crops.</p>
+                          <div className="row g-3">
+                            <div className="col-md-6">
+                              <label className="label-modern">Account Holder Name</label>
+                              <input type="text" className="input-modern" name="bankAccountHolderName" placeholder="Full name on bank account" value={formData.bankAccountHolderName} onChange={handleProfileChange} />
+                            </div>
+                            <div className="col-md-6">
+                              <label className="label-modern">Account Number</label>
+                              <input type="text" className="input-modern" name="bankAccountNumber" placeholder="Enter account number" value={formData.bankAccountNumber} onChange={handleProfileChange} />
+                            </div>
+                            <div className="col-md-6">
+                              <label className="label-modern">IFSC Code</label>
+                              <input type="text" className="input-modern" name="bankIfscCode" placeholder="e.g. SBIN0001234" value={formData.bankIfscCode} onChange={handleProfileChange} />
+                            </div>
+                            <div className="col-md-6">
+                              <label className="label-modern">Bank Name</label>
+                              <input type="text" className="input-modern" name="bankName" placeholder="e.g. State Bank of India" value={formData.bankName} onChange={handleProfileChange} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
+                  <div className="col-12 d-flex gap-2 justify-content-end pt-4 mt-2">
+                    <button className="btn-modern btn-modern-outline" onClick={() => { setIsEditing(false); setScrollToBankOnEdit(false) }}>Cancel</button>
+                    <button className="btn-modern btn-modern-primary px-5" onClick={handleSaveProfile}>Update Profile</button>
+                  </div>
                 </div>
-                
-                <div className="profile-details mb-4">
-                  {isEditing ? (
-                    <div className="row g-4 bg-light p-4 rounded-4 shadow-sm border">
-                      <div className="col-md-6">
-                        <label className="form-label text-muted small text-uppercase mb-1 fw-bold">Name</label>
-                        <input type="text" className="form-control rounded-3" name="name" value={formData.name} onChange={handleProfileChange} />
+              ) : (
+                <div className="row g-4">
+                  {/* ── Bank Details Warning Banner (Farmers without bank info) ── */}
+                  {user.role === 'Farmer' && !user.bankAccountNumber && (
+                    <div className="col-12">
+                      <div className="p-4 rounded-4 border-2 d-flex align-items-start gap-3"
+                        style={{ background: 'linear-gradient(135deg, #fef3c7, #fffbeb)', borderColor: '#f59e0b', borderStyle: 'solid' }}>
+                        <div className="flex-shrink-0">
+                          <div className="icon-box-modern rounded-3 mb-0" style={{ background: '#fef3c7', color: '#b45309', width: '48px', height: '48px' }}>
+                            <i className="bi bi-exclamation-triangle-fill fs-5"></i>
+                          </div>
+                        </div>
+                        <div className="flex-grow-1">
+                          <h6 className="fw-bold mb-1" style={{ color: '#92400e' }}>
+                            ⚠️ Your listings are hidden from the Storefront
+                          </h6>
+                          <p className="small mb-3" style={{ color: '#b45309' }}>
+                            Buyers cannot see or order your crops until you add your bank details. This ensures payments can be processed securely.
+                          </p>
+                          <button
+                            className="btn-modern btn-modern-primary btn-sm px-4 py-2 shadow-sm"
+                            style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none' }}
+                            onClick={handleEditBankDetails}
+                          >
+                            <i className="bi bi-bank2 me-2"></i>Add Bank Details Now
+                          </button>
+                        </div>
                       </div>
-                      <div className="col-md-6">
-                        <label className="form-label text-muted small text-uppercase mb-1 fw-bold">Mobile</label>
-                        <input type="text" className="form-control rounded-3" name="mobile" value={formData.mobile} onChange={handleProfileChange} />
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label text-muted small text-uppercase mb-1 fw-bold">Full Address / Location</label>
-                        <textarea className="form-control rounded-3" name="address" rows="3" value={formData.address} onChange={handleProfileChange}></textarea>
+                    </div>
+                  )}
+                  <div className="col-md-6 p-4 rounded-4 bg-slate-50 border border-slate-100">
+                    <label className="label-modern mb-2">Identification</label>
+                    <div className="fw-bold text-slate-900 mb-1">{user.name}</div>
+                    <div className="text-slate-500 small">Aadhar: {user.aadharno}</div>
+                  </div>
+                  <div className="col-md-6 p-4 rounded-4 bg-slate-50 border border-slate-100">
+                    <label className="label-modern mb-2">Communication</label>
+                    <div className="fw-bold text-slate-900 mb-1">{user.mobile}</div>
+                    <div className="text-slate-500 small">{user.email}</div>
+                  </div>
+                  <div className="col-12 p-4 rounded-4 bg-slate-50 border border-slate-100">
+                    <label className="label-modern mb-2">Primary Location</label>
+                    <div className="text-slate-700 leading-relaxed">{user.address || 'Address not listed.'}</div>
+                  </div>
+                  {user.role === 'Farmer' && (
+                    <>
+                      <div className="col-12 p-4 rounded-4 bg-emerald-50 bg-opacity-30 border border-emerald-100">
+                        <div className="row g-3">
+                          <div className="col-6">
+                            <label className="label-modern mb-1">Crops</label>
+                            <div className="fw-bold text-emerald-800">{user.cropsGrown || '—'}</div>
+                          </div>
+                          <div className="col-6">
+                            <label className="label-modern mb-1">Season</label>
+                            <div className="fw-bold text-emerald-800">{user.season || '—'}</div>
+                          </div>
+                        </div>
                       </div>
                       
-                      <div className="col-md-6">
-                        <label className="form-label text-muted small text-uppercase mb-1 fw-bold">Types of Crops (If farming)</label>
-                        <input type="text" className="form-control rounded-3" name="cropsGrown" value={formData.cropsGrown} onChange={handleProfileChange} placeholder="e.g. Rice, Wheat" />
+                      <div className="col-12 p-4 rounded-4 border" style={{background: 'linear-gradient(135deg, #ecfdf5, #f0fdf4)', borderColor: '#a7f3d0'}}>
+                        <div className="d-flex align-items-center gap-2 mb-3">
+                          <i className="bi bi-bank2 text-emerald-600 fs-5"></i>
+                          <h6 className="fw-bold text-emerald-800 mb-0">Bank Details</h6>
+                          {user.bankAccountNumber ? (
+                            <span className="badge rounded-pill px-2 py-1 small ms-auto" style={{backgroundColor: '#d1fae5', color: '#065f46'}}><i className="bi bi-check-circle-fill me-1"></i>Configured</span>
+                          ) : (
+                            <span className="badge rounded-pill px-2 py-1 small ms-auto" style={{backgroundColor: '#fef3c7', color: '#92400e'}}><i className="bi bi-exclamation-triangle-fill me-1"></i>Not Set</span>
+                          )}
+                        </div>
+                        {user.bankAccountNumber ? (
+                          <div className="row g-2">
+                            <div className="col-md-6">
+                              <label className="label-modern mb-1">Account Holder</label>
+                              <div className="fw-bold text-slate-800">{user.bankAccountHolderName}</div>
+                            </div>
+                            <div className="col-md-6">
+                              <label className="label-modern mb-1">Account Number</label>
+                              <div className="fw-bold text-slate-800 font-monospace">{user.bankAccountNumber}</div>
+                            </div>
+                            <div className="col-md-6">
+                              <label className="label-modern mb-1">IFSC</label>
+                              <div className="fw-bold text-slate-800 font-monospace">{user.bankIfscCode}</div>
+                            </div>
+                            <div className="col-md-6">
+                              <label className="label-modern mb-1">Bank</label>
+                              <div className="fw-bold text-slate-800">{user.bankName}</div>
+                            </div>
+                            <div className="col-12 mt-2">
+                              <button
+                                className="btn-modern btn-modern-outline btn-sm px-3 py-1"
+                                onClick={handleEditBankDetails}
+                              >
+                                <i className="bi bi-pencil-square me-1"></i>Update Bank Details
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="d-flex align-items-center justify-content-between">
+                            <p className="text-slate-500 small mb-0">
+                              <i className="bi bi-info-circle me-1"></i>
+                              Bank details are required for buyers to pay you.
+                            </p>
+                            <button
+                              className="btn-modern btn-modern-primary btn-sm px-4 ms-3 flex-shrink-0"
+                              onClick={handleEditBankDetails}
+                            >
+                              <i className="bi bi-plus-lg me-1"></i>Add Now
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <div className="col-md-6">
-                        <label className="form-label text-muted small text-uppercase mb-1 fw-bold">Preferred Season</label>
-                        <input type="text" className="form-control rounded-3" name="season" value={formData.season} onChange={handleProfileChange} placeholder="e.g. Kharif" />
-                      </div>
-                      <div className="col-12 d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-                        <button className="btn btn-light rounded-pill px-4 fw-medium" onClick={() => setIsEditing(false)}>Cancel</button>
-                        <button className={`btn ${user.role === 'Shop Owner' ? 'btn-primary' : 'btn-success'} shadow rounded-pill px-4 fw-medium`} onClick={handleSaveProfile}>Save Changes</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="row g-0 rounded-4 overflow-hidden border">
-                      <div className="col-md-6 p-4 border-end border-bottom bg-white">
-                        <div className="text-secondary small text-uppercase fw-bold mb-1"><i className="bi bi-telephone me-1"></i> Mobile</div>
-                        <div className="fs-5 text-dark fw-medium">{user.mobile}</div>
-                      </div>
-                      <div className="col-md-6 p-4 border-bottom bg-light">
-                        <div className="text-secondary small text-uppercase fw-bold mb-1"><i className="bi bi-envelope me-1"></i> Email</div>
-                        <div className="fs-5 text-dark fw-medium text-break">{user.email}</div>
-                      </div>
-                      <div className="col-md-6 p-4 border-end border-bottom bg-light">
-                        <div className="text-secondary small text-uppercase fw-bold mb-1"><i className="bi bi-upc-scan me-1"></i> Aadhar Number</div>
-                        <div className="fs-5 text-dark fw-medium">{user.aadharno}</div>
-                      </div>
-                      <div className="col-md-6 p-4 border-bottom bg-white">
-                        <div className="text-secondary small text-uppercase fw-bold mb-1"><i className="bi bi-thermometer-sun me-1"></i> Primary Season</div>
-                        <div className="fs-5 text-dark fw-medium">{user.season || 'Not specified'}</div>
-                      </div>
-                      <div className="col-12 p-4 bg-light">
-                        <div className="text-secondary small text-uppercase fw-bold mb-1"><i className="bi bi-house me-1"></i> Address</div>
-                        <div className="fs-5 text-dark fw-medium">{user.address || 'Not specified'}</div>
-                      </div>
-                    </div>
+                    </>
                   )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
-            {/* FARMER MANAGE VIEW */}
-            {activeTab === 'manage' && user.role === 'Farmer' && (
-              <div className="fade-in">
-                <div className="card shadow-lg border-0 rounded-4 mb-5 overflow-hidden">
-                  <div className="card-header bg-success text-white px-4 py-3">
-                    <h4 className="mb-0 fw-bold"><i className="bi bi-plus-circle me-2"></i> Create New Crop Listing</h4>
+          {activeTab === 'manage' && (
+            <div className="fade-in space-y-6">
+              {/* Creator Card */}
+              <div className="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-stone-100">
+                <div className="d-flex align-items-center gap-3 mb-4">
+                  <div className={`icon-box-modern icon-box-${theme.class} mb-0`}>
+                    <i className="bi bi-plus-lg"></i>
                   </div>
-                  <div className="card-body p-4 p-md-5 bg-white">
-                    <form onSubmit={handleCreateListing}>
-                      <div className="row g-4">
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Local Crop Name</label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light text-success"><i className="bi bi-flower2"></i></span>
-                            <select name="cropName" className="form-select bg-light" value={listingForm.cropName} onChange={(e) => handleFormChange(e, 'listing')} required>
-                              {cropOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                          </div>
-                        </div>
-                        
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Harvest Season</label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light text-success"><i className="bi bi-cloud-sun"></i></span>
-                            <select name="season" className="form-select bg-light" value={listingForm.season} onChange={(e) => handleFormChange(e, 'listing')} required>
-                              {seasonOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Available Quantity</label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light"><i className="bi bi-box"></i></span>
-                            <input type="text" name="quantity" className="form-control" placeholder="e.g. 50 kg or 10 Quintals" value={listingForm.quantity} onChange={(e) => handleFormChange(e, 'listing')} required />
-                          </div>
-                        </div>
-
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Price Expected (per unit)</label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light text-success fw-bold">₹</span>
-                            <input type="number" step="0.01" name="pricePerUnit" className="form-control" placeholder="1200.00" value={listingForm.pricePerUnit} onChange={(e) => handleFormChange(e, 'listing')} required />
-                          </div>
-                        </div>
-
-                        <div className="col-12">
-                          <label className="form-label text-dark fw-semibold">Upload Crop Photo</label>
-                          <div className="p-4 border border-2 border-dashed rounded-4 text-center bg-light">
-                            <input type="file" id="imageInput" name="image" className="form-control d-none" accept="image/*" onChange={(e) => handleFormChange(e, 'listing')} />
-                            <button type="button" className="btn btn-outline-success rounded-pill px-4 fw-medium mb-2" onClick={() => document.getElementById('imageInput').click()}>
-                              {listingForm.image ? 'Change Photo' : 'Select Photo from Device'}
-                            </button>
-                            <div className="text-muted small mt-1">
-                              {listingForm.image ? <span className="text-success fw-bold"><i className="bi bi-check-circle-fill me-1"></i> {listingForm.image.name} selected</span> : "Upload a clear photo for better pricing."}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="col-12 mt-4 text-end border-top pt-4">
-                          <button type="submit" className="btn btn-success rounded-pill px-5 fw-bold shadow-lg btn-lg">Publish Listing to Marketplace</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
+                  <h4 className="fw-bold text-slate-900 mb-0">
+                    {user.role === 'Farmer' ? 'List New Crop Harvest' : user.role === 'Shop Owner' ? 'Add Fertilizer Product' : 'Broadcast Market Demand'}
+                  </h4>
                 </div>
 
-                <h4 className="text-success fw-bold mb-4 border-bottom pb-2">My Active Crop Listings</h4>
-                {loadingItems ? (
-                  <div className="text-center py-5"><div className="spinner-border text-success"></div></div>
-                ) : myItems.length === 0 ? (
-                  <div className="card border-0 bg-light rounded-4 p-5 text-center shadow-sm"><h5 className="text-muted">You haven't listed any crops yet.</h5></div>
-                ) : (
+                {user.role === 'Farmer' && !user.bankAccountNumber && (
+                  <div className="mb-4 p-4 rounded-4 border-2 d-flex align-items-start gap-3"
+                    style={{ background: 'linear-gradient(135deg, #fffbeb, #fff7ed)', borderColor: '#fbbf24', borderStyle: 'solid' }}>
+                    <div className="flex-shrink-0">
+                      <div className="icon-box-modern rounded-3 mb-0" style={{ background: '#fef3c7', color: '#b45309', width: '40px', height: '40px' }}>
+                        <i className="bi bi-info-circle-fill"></i>
+                      </div>
+                    </div>
+                    <div className="flex-grow-1">
+                      <p className="small mb-1 text-amber-900 fw-bold">Bank Details Required</p>
+                      <p className="small mb-0 text-amber-800">
+                        Notice: You can list your crops, but they will <strong>not be visible</strong> in the marketplace until you add your bank details in the 'Profile Information' tab.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={user.role === 'Farmer' ? handleCreateListing : user.role === 'Shop Owner' ? handleCreateFertilizer : handleCreateOrder}>
                   <div className="row g-4">
-                    {myItems.map(item => (
-                      <div className="col-12 col-md-6" key={item.id}>
-                        <div className="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
-                          {item.imageUrl && (
-                            <img src={`${API_BASE.replace('/api', '')}${item.imageUrl}`} alt={item.cropName} className="card-img-top object-fit-cover" style={{ height: '180px' }} />
+                    {user.role === 'Farmer' && (
+                      <>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Crop Variety</label>
+                          <select className="input-modern select-modern" name="cropName" value={listingForm.cropName} onChange={(e) => handleFormChange(e, 'listing')} required>
+                            {cropOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Season</label>
+                          <select className="input-modern select-modern" name="season" value={listingForm.season} onChange={(e) => handleFormChange(e, 'listing')} required>
+                            {seasonOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Quantity</label>
+                          <input type="text" name="quantity" className="input-modern" placeholder="e.g. 500 kg" value={listingForm.quantity} onChange={(e) => handleFormChange(e, 'listing')} required />
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Expected Price (₹)</label>
+                          <input type="number" step="0.01" name="pricePerUnit" className="input-modern" placeholder="Per unit" value={listingForm.pricePerUnit} onChange={(e) => handleFormChange(e, 'listing')} required />
+                        </div>
+                        <div className="col-12 form-group-modern">
+                          <label className="label-modern">Crop Imagery (Optional)</label>
+                          <input type="file" className="input-modern" accept="image/*" name="image" onChange={(e) => handleFormChange(e, 'listing')} />
+                        </div>
+                      </>
+                    )}
+
+                    {user.role === 'Shop Owner' && (
+                      <>
+                        <div className="col-12 form-group-modern">
+                          <label className="label-modern">Product Name</label>
+                          <input type="text" name="fertilizerName" className="input-modern" value={fertForm.fertilizerName} onChange={(e) => handleFormChange(e, 'fertilizer')} required />
+                        </div>
+                        <div className="col-12 form-group-modern">
+                          <label className="label-modern">Detailed Description</label>
+                          <textarea name="description" className="input-modern textarea-modern" value={fertForm.description} onChange={(e) => handleFormChange(e, 'fertilizer')} required></textarea>
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Unit Price (₹)</label>
+                          <input type="number" name="price" className="input-modern" value={fertForm.price} onChange={(e) => handleFormChange(e, 'fertilizer')} required />
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Availability Location</label>
+                          <input type="text" name="location" className="input-modern" value={fertForm.location} onChange={(e) => handleFormChange(e, 'fertilizer')} required />
+                        </div>
+                        <div className="col-12 form-group-modern">
+                          <label className="label-modern">Product Image</label>
+                          <input type="file" className="input-modern" name="image" onChange={(e) => handleFormChange(e, 'fertilizer')} />
+                        </div>
+                      </>
+                    )}
+
+                    {user.role === 'Buyer' && (
+                      <>
+                        <div className="col-12 form-group-modern">
+                          <label className="label-modern">Crop Required</label>
+                          <select name="cropName" className="input-modern select-modern" value={orderForm.cropName} onChange={(e) => handleFormChange(e, 'order')} required>
+                            {cropOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Target Quantity</label>
+                          <input type="text" name="requiredQuantity" className="input-modern" value={orderForm.requiredQuantity} onChange={(e) => handleFormChange(e, 'order')} required />
+                        </div>
+                        <div className="col-md-6 form-group-modern">
+                          <label className="label-modern">Budget per Unit (₹)</label>
+                          <input type="number" name="targetPrice" className="input-modern" value={orderForm.targetPrice} onChange={(e) => handleFormChange(e, 'order')} required />
+                        </div>
+                      </>
+                    )}
+                    
+                    <div className="col-12 text-end">
+                      <button type="submit" className={`btn-modern btn-modern-primary px-5 py-3 shadow`}>
+                        {user.role === 'Buyer' ? 'Post to Market' : 'Publish to Storefront'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              {/* Listings / Items Table-style cards */}
+              <h5 className="fw-bold text-slate-900 mb-4 px-2">Published Active Records</h5>
+              {loadingItems ? (
+                <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
+              ) : myItems.length === 0 ? (
+                <div className="text-center py-5 bg-slate-50 rounded-4 border border-dashed border-slate-200">
+                  <p className="text-slate-400 mb-0">No records found. Start by creating a listing above.</p>
+                </div>
+              ) : (
+                <div className="row g-3">
+                  {myItems.map(item => (
+                    <div className="col-12" key={item.id}>
+                      <div className="card-modern p-3 border-0 shadow-sm d-flex align-items-center gap-3 hover-reveal">
+                        <div className="rounded-4 bg-slate-50 d-flex align-items-center justify-content-center border border-slate-100" style={{ width: '64px', height: '64px', flexShrink: 0, overflow: 'hidden' }}>
+                          {item.imageUrl ? (
+                            <img src={`http://localhost:8081${item.imageUrl}`} className="w-100 h-100 object-fit-cover transition-transform" alt="" />
+                          ) : (
+                            <i className={`bi ${theme.icon} text-slate-300 fs-3`}></i>
                           )}
-                          <div className="card-body p-4 bg-white">
-                            <h5 className="fw-bold text-success mb-1">{item.cropName}</h5>
-                            <span className="badge bg-light text-dark mb-3"><i className="bi bi-cloud-sun"></i> {item.season}</span>
-                            <div className="d-flex justify-content-between text-muted small mt-2">
-                              <span><strong>Qty:</strong> {item.quantity}</span><span className="text-success fw-bold">₹{item.pricePerUnit}</span>
-                            </div>
+                        </div>
+                        <div className="flex-grow-1 overflow-hidden">
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <div className="fw-bold text-slate-900 text-truncate">{item.cropName || item.fertilizerName}</div>
+                            {item.verificationStatus === 'UNVERIFIED' || item.verificationStatus === 'PENDING' ? (
+                                <span className="bg-amber-100 text-amber-800 rounded-full py-0 px-2 fw-bold" style={{ fontSize: '0.6rem' }}>Verification Pending</span>
+                            ) : item.verificationStatus === 'REJECTED' ? (
+                                <span className="bg-red-100 text-red-800 rounded-full py-0 px-2 fw-bold" style={{ fontSize: '0.6rem' }}>Rejected</span>
+                            ) : (
+                                <span className="bg-emerald-100 text-emerald-800 rounded-full py-0 px-2 fw-bold" style={{ fontSize: '0.6rem' }}>Active / Verified</span>
+                            )}
                           </div>
+                          <div className="text-slate-500 x-small d-flex align-items-center gap-3">
+                             <span><i className="bi bi-stack me-1"></i> {item.quantity || item.requiredQuantity || 'In Stock'}</span>
+                             {item.season && <span><i className="bi bi-calendar3 me-1"></i> {item.season}</span>}
+                          </div>
+                        </div>
+                        <div className="text-end ps-3 border-start border-slate-100">
+                          <div className="text-slate-400 x-small text-uppercase fw-bold mb-1">Market Price</div>
+                          <div className="fw-bold text-primary">₹{(item.pricePerUnit || item.targetPrice || item.price)?.toLocaleString()}</div>
+                        </div>
+                        <div className="ms-2">
+                           <button className="btn-modern btn-modern-outline p-2 rounded-circle" style={{ width: '32px', height: '32px' }}>
+                              <i className="bi bi-three-dots-vertical"></i>
+                           </button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* SHOP OWNER MANAGE VIEW */}
-            {activeTab === 'manage' && user.role === 'Shop Owner' && (
-              <div className="fade-in">
-                <div className="card shadow-lg border-0 border-top border-primary border-4 rounded-4 mb-5 overflow-hidden">
-                  <div className="card-header bg-white px-4 py-3 border-bottom">
-                    <h4 className="mb-0 fw-bold text-dark"><i className="bi bi-flower3 text-primary me-2"></i> Add Fertilizer Product</h4>
-                  </div>
-                  <div className="card-body p-4 p-md-5 bg-white">
-                    <form onSubmit={handleCreateFertilizer}>
-                      <div className="row g-4">
-                        <div className="col-md-12">
-                          <label className="form-label text-dark fw-semibold">Product Name / Brand</label>
-                          <input type="text" name="fertilizerName" className="form-control py-2 bg-light border-0" placeholder="e.g. Urea 46%, NPK" value={fertForm.fertilizerName} onChange={(e) => handleFormChange(e, 'fertilizer')} required />
-                        </div>
-                        <div className="col-md-12">
-                          <label className="form-label text-dark fw-semibold">Product Description</label>
-                          <textarea name="description" className="form-control bg-light border-0" rows="3" placeholder="Describe the nutrients, usage, quantity per bag..." value={fertForm.description} onChange={(e) => handleFormChange(e, 'fertilizer')} required></textarea>
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Price Expected (₹)</label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light border-0">₹</span>
-                            <input type="number" step="1" name="price" className="form-control bg-light border-0" placeholder="e.g. 500" value={fertForm.price} onChange={(e) => handleFormChange(e, 'fertilizer')} required />
-                          </div>
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Location (City / State)</label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light border-0"><i className="bi bi-geo-alt"></i></span>
-                            <input type="text" name="location" className="form-control bg-light border-0" placeholder="e.g. Pune, Maharashtra" value={fertForm.location} onChange={(e) => handleFormChange(e, 'fertilizer')} required />
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <label className="form-label text-dark fw-semibold">Upload Product Image</label>
-                          <input type="file" id="fertImageInput" name="image" className="form-control bg-light border-0" accept="image/*" onChange={(e) => handleFormChange(e, 'fertilizer')} />
-                        </div>
-                        
-                        <div className="col-12 mt-4 text-end">
-                          <button type="submit" className="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">Post to Marketplace</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
+                    </div>
+                  ))}
                 </div>
-
-                <h4 className="text-primary fw-bold mb-4 border-bottom pb-2">My E-Commerce Products</h4>
-                {loadingItems ? (
-                  <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
-                ) : myItems.length === 0 ? (
-                  <div className="card bg-light border-0 rounded-4 p-4 text-center">
-                    <p className="text-muted mb-0">You haven't added any products to the store yet.</p>
-                  </div>
-                ) : (
-                  <div className="row g-4">
-                    {myItems.map(item => (
-                      <div className="col-12 col-md-6" key={item.id}>
-                        <div className="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
-                          {item.imageUrl && (
-                            <img src={`${API_BASE.replace('/api', '')}${item.imageUrl}`} alt={item.fertilizerName} className="card-img-top object-fit-cover" style={{ height: '180px' }} />
-                          )}
-                          <div className="card-body p-4 bg-white">
-                            <h5 className="fw-bold text-dark mb-1 line-clamp-1">{item.fertilizerName}</h5>
-                            <div className="text-primary fw-bold fs-5 mb-2">₹{item.price}</div>
-                            <div className="small text-muted line-clamp-2">{item.description}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* BUYER MANAGE VIEW */}
-            {activeTab === 'manage' && user.role === 'Buyer' && (
-              <div className="fade-in">
-                <div className="card shadow-lg border-0 border-top border-warning border-4 rounded-4 mb-5 overflow-hidden">
-                  <div className="card-header bg-white px-4 py-3 border-bottom">
-                    <h4 className="mb-0 fw-bold text-dark"><i className="bi bi-megaphone text-warning me-2"></i> Post Buyer Requirement</h4>
-                  </div>
-                  <div className="card-body p-4 p-md-5 bg-light">
-                    <form onSubmit={handleCreateOrder}>
-                      <div className="row g-4">
-                        <div className="col-md-12">
-                          <label className="form-label text-dark fw-semibold">Local Crop Required</label>
-                          <div className="input-group shadow-sm">
-                            <span className="input-group-text bg-white text-warning"><i className="bi bi-flower1"></i></span>
-                            <select name="cropName" className="form-select border-start-0 py-2" value={orderForm.cropName} onChange={(e) => handleFormChange(e, 'order')} required>
-                              {cropOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Required Quantity</label>
-                          <input type="text" name="requiredQuantity" className="form-control py-2 shadow-sm" placeholder="e.g. 50 Tons" value={orderForm.requiredQuantity} onChange={(e) => handleFormChange(e, 'order')} required />
-                        </div>
-
-                        <div className="col-md-6">
-                          <label className="form-label text-dark fw-semibold">Target Price (per unit)</label>
-                          <div className="input-group shadow-sm">
-                            <span className="input-group-text bg-white text-dark fw-bold">₹</span>
-                            <input type="number" step="0.01" name="targetPrice" className="form-control border-start-0 py-2" placeholder="Maximum willing to pay" value={orderForm.targetPrice} onChange={(e) => handleFormChange(e, 'order')} required />
-                          </div>
-                        </div>
-                        
-                        <div className="col-12 mt-4 text-end">
-                          <button type="submit" className="btn btn-warning rounded-pill px-5 fw-bold shadow btn-lg text-dark">Broadcast Demand to Farmers</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-
-                <h4 className="text-warning-emphasis fw-bold mb-4 border-bottom pb-2">My Open Requirements</h4>
-                {loadingItems ? (
-                  <div className="text-center py-5"><div className="spinner-border text-warning"></div></div>
-                ) : myItems.length === 0 ? (
-                  <div className="card border-0 bg-light rounded-4 p-5 text-center shadow-sm">
-                    <h5 className="text-muted">You don't have any active requirements.</h5>
-                  </div>
-                ) : (
-                  <div className="row g-4">
-                    {myItems.map(item => (
-                      <div className="col-12 col-md-6" key={item.id}>
-                        <div className="card shadow-sm border-0 border-start border-warning border-4 rounded-4 h-100 p-3 bg-white">
-                          <h5 className="fw-bold mb-3">{item.cropName}</h5>
-                          <div className="d-flex justify-content-between text-muted mb-2">
-                            <span>Req Qty:</span><span className="text-dark fw-bold">{item.requiredQuantity}</span>
-                          </div>
-                          <div className="d-flex justify-content-between text-muted mb-3">
-                            <span>Target Price:</span><span className="text-warning-emphasis fw-bold">₹{item.targetPrice} / unit</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -591,3 +600,4 @@ function Profile({ user, onLogout, onUpdate }) {
 }
 
 export default Profile
+

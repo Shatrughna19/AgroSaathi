@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,7 @@ public class UserService {
         userRepository.findByAadharno(user.getAadharno()).ifPresent(existing -> {
             throw new RuntimeException("Aadhar number already registered");
         });
-        // NOTE: For real apps, hash the password before saving.
+        user.setVerificationStatus("PENDING");
         return userRepository.save(user);
     }
 
@@ -55,6 +56,16 @@ public class UserService {
         existingUser.setCropsGrown(updatedUser.getCropsGrown());
         existingUser.setSeason(updatedUser.getSeason());
 
+        // Bank details
+        if (updatedUser.getBankAccountNumber() != null)
+            existingUser.setBankAccountNumber(updatedUser.getBankAccountNumber());
+        if (updatedUser.getBankIfscCode() != null)
+            existingUser.setBankIfscCode(updatedUser.getBankIfscCode());
+        if (updatedUser.getBankName() != null)
+            existingUser.setBankName(updatedUser.getBankName());
+        if (updatedUser.getBankAccountHolderName() != null)
+            existingUser.setBankAccountHolderName(updatedUser.getBankAccountHolderName());
+
         return userRepository.save(existingUser);
     }
 
@@ -80,5 +91,23 @@ public class UserService {
             return userRepository.save(user);
         }
         return user;
+    }
+
+    // ─── New Admin Methods ──────────────────────────────────────────────
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public User updateVerificationStatus(Long id, String status) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setVerificationStatus(status);
+        return userRepository.save(user);
     }
 }

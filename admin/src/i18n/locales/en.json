@@ -2,7 +2,16 @@
   "admin": {
     "title": "AgroSaathi Administration",
     "subtitle": "Crop Verification Portal",
-    "tagline": "Verify and manage crop listings"
+    "tagline": "Verify and manage crop listings",
+    "role": "Administrative Officer"
+  },
+  "common": {
+    "refresh": "Refresh List",
+    "loading": "Loading...",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "notProvided": "Not Provided"
   },
   "register": {
     "title": "Officer Registration",
@@ -48,9 +57,13 @@
     "selectLanguage": "Select Language",
     "myProfile": "My Profile",
     "pendingVerifications": "Pending Verifications",
+    "pendingListings": "Pending Crop Listings",
     "totalPending": "Total Pending",
     "crops": "Crops",
     "noData": "No data available",
+    "requiresAttention": "Requires immediate attention",
+    "checkConnection": "Please check your server connection or try refreshing the page.",
+    "error": "Access Error",
     "welcome": "Welcome to Dashboard",
     "officerId": "Officer ID",
     "errorFetchingCrops": "Error fetching crops for verification",

@@ -39,7 +39,13 @@ export default function AdminLogin({ onLoginSuccess, onSwitchToRegister }) {
       const data = await response.json()
 
       if (response.ok) {
-        onLoginSuccess({ name: data.name, email: data.email, officerId: data.officerId })
+        onLoginSuccess({ 
+          name: data.name, 
+          email: data.email, 
+          officerId: data.officerId,
+          designation: data.designation,
+          district: data.district 
+        })
       } else {
         setError(data.message || t('login.invalidCredentials'))
       }
@@ -51,51 +57,78 @@ export default function AdminLogin({ onLoginSuccess, onSwitchToRegister }) {
   }
 
   return (
-    <div className="row justify-content-center">
+    <div className="row justify-content-center pt-5">
       <div className="col-md-5">
-        <div className="card auth-card p-5 fade-in">
-          <h2 className="text-center mb-4 text-dark">{t('login.title')}</h2>
+        <div className="stat-card fade-in border-top border-5 border-success p-5 shadow-lg">
+          <div className="text-center mb-5">
+            <div className="bg-success-subtle text-success p-3 rounded-circle d-inline-block mb-3">
+              <i className="bi bi-shield-lock display-6"></i>
+            </div>
+            <h2 className="fw-black text-dark mb-1">{t('login.title')}</h2>
+            <p className="text-muted">{t('admin.tagline')}</p>
+          </div>
 
           <form onSubmit={handleSubmit}>
-            {error && <div className="alert alert-danger">{error}</div>}
-
-            <div className="mb-3">
-              <label className="form-label text-dark">{t('login.officerId')}</label>
-              <input
-                type="text"
-                name="officerId"
-                className="admin-input form-control"
-                value={formData.officerId}
-                onChange={handleChange}
-                placeholder={t('login.officerId')}
-              />
-            </div>
+            {error && (
+              <div className="alert alert-danger rounded-4 border-0 shadow-sm d-flex align-items-center gap-2 mb-4">
+                <i className="bi bi-exclamation-triangle"></i>
+                {error}
+              </div>
+            )}
 
             <div className="mb-4">
-              <label className="form-label text-dark">{t('login.password')}</label>
-              <input
-                type="password"
-                name="password"
-                className="admin-input form-control"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder={t('login.password')}
-              />
+              <label className="form-label text-dark fw-bold small uppercase">{t('login.officerId')}</label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-0 rounded-start-4">
+                  <i className="bi bi-person-badge text-muted"></i>
+                </span>
+                <input
+                  type="text"
+                  name="officerId"
+                  className="admin-input form-control rounded-end-4"
+                  value={formData.officerId}
+                  onChange={handleChange}
+                  placeholder="ID Number"
+                />
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <label className="form-label text-dark fw-bold small uppercase">{t('login.password')}</label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-0 rounded-start-4">
+                  <i className="bi bi-key text-muted"></i>
+                </span>
+                <input
+                  type="password"
+                  name="password"
+                  className="admin-input form-control rounded-end-4"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             <button
               type="submit"
-              className="admin-btn btn btn-success w-100 mb-3"
+              className="admin-btn w-100 mb-4 py-3"
               disabled={loading}
+              style={{ background: 'var(--grad-emerald)' }}
             >
-              {loading ? t('common.loading') : t('login.submit')}
+              {loading ? (
+                <span className="spinner-border spinner-border-sm me-2"></span>
+              ) : (
+                <i className="bi bi-box-arrow-in-right me-2"></i>
+              )}
+              {t('login.submit')}
             </button>
 
             <div className="text-center">
-              <span className="text-dark">{t('login.noAccount')}</span>
+              <span className="text-muted small">{t('login.noAccount')}</span>
               <button
                 type="button"
-                className="btn btn-link text-decoration-none"
+                className="btn btn-link text-success fw-bold text-decoration-none small"
                 onClick={onSwitchToRegister}
               >
                 {t('login.registerHere')}

@@ -38,7 +38,7 @@ public class CropVerificationService {
     /**
      * Create or update verification
      */
-    public CropVerification verifyListing(Long cropListingId, String officerId, String status, String feedback, String surveyerName) throws Exception {
+    public CropVerification verifyListing(Long cropListingId, String officerId, String status, String feedback, String surveyerName, String grade) throws Exception {
         // Check if verification already exists
         Optional<CropVerification> existingVerification = cropVerificationRepository.findByCropListingId(cropListingId);
         
@@ -49,8 +49,10 @@ public class CropVerificationService {
             verification.setFeedback(feedback);
             verification.setOfficerId(officerId);
             verification.setSurveyerName(surveyerName);
+            verification.setGrade(grade);
         } else {
             verification = new CropVerification(cropListingId, officerId, status, feedback, surveyerName);
+            verification.setGrade(grade);
         }
 
         return cropVerificationRepository.save(verification);

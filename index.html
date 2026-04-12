@@ -3,13 +3,93 @@
 
 <head>
   <meta charset="UTF-8" />
-  <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agro Saathi</title>
+  
+  <!-- New Theme Fonts and Tailwind setup -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+          tailwind.config = {
+              darkMode: "class",
+              theme: {
+                  extend: {
+                      "colors": {
+                          "surface-container-lowest": "#ffffff",
+                          "on-primary-fixed": "#002201",
+                          "on-tertiary-container": "#c4c4ad",
+                          "surface-variant": "#f0e1c5",
+                          "secondary-container": "#fdc39a",
+                          "on-surface": "#221b0a",
+                          "primary-fixed": "#bcf0ae",
+                          "on-secondary-container": "#794e2e",
+                          "on-secondary": "#ffffff",
+                          "surface-container-low": "#fff2dc",
+                          "on-tertiary-fixed-variant": "#474836",
+                          "secondary-fixed-dim": "#f4bb92",
+                          "primary-fixed-dim": "#a1d494",
+                          "error-container": "#ffdad6",
+                          "surface-tint": "#3b6934",
+                          "tertiary-fixed": "#e4e4cc",
+                          "on-error-container": "#93000a",
+                          "secondary-fixed": "#ffdcc5",
+                          "tertiary-container": "#50513f",
+                          "on-primary": "#ffffff",
+                          "surface-container-highest": "#f0e1c5",
+                          "on-background": "#221b0a",
+                          "inverse-primary": "#a1d494",
+                          "error": "#ba1a1a",
+                          "background": "#fff8f1",
+                          "on-tertiary": "#ffffff",
+                          "on-tertiary-fixed": "#1b1d0e",
+                          "surface-dim": "#e7d8bd",
+                          "surface-container": "#fbecd0",
+                          "inverse-surface": "#382f1d",
+                          "surface": "#fff8f1",
+                          "outline-variant": "#c2c9bb",
+                          "surface-bright": "#fff8f1",
+                          "secondary": "#805533",
+                          "on-secondary-fixed-variant": "#653d1e",
+                          "on-primary-container": "#9dd090",
+                          "surface-container-high": "#f6e7cb",
+                          "inverse-on-surface": "#feefd3",
+                          "primary": "#154212",
+                          "tertiary": "#393a29",
+                          "outline": "#72796e",
+                          "on-primary-fixed-variant": "#23501e",
+                          "on-secondary-fixed": "#301400",
+                          "primary-container": "#2d5a27",
+                          "on-surface-variant": "#42493e",
+                          "on-error": "#ffffff",
+                          "tertiary-fixed-dim": "#c8c8b1"
+                      },
+                      "borderRadius": {
+                          "DEFAULT": "0.25rem",
+                          "lg": "0.5rem",
+                          "xl": "0.75rem",
+                          "full": "9999px"
+                      },
+                      "fontFamily": {
+                          "headline": ["Manrope"],
+                          "body": ["Inter"],
+                          "label": ["Inter"]
+                      }
+                  },
+              },
+          }
+      </script>
+  <style>
+          .material-symbols-outlined {
+              font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          }
+          body { font-family: 'Inter', sans-serif; }
+          h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+      </style>
 </head>
 
-<body>
-  <div id="root"></div>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+  <div id="root" class="w-full flex"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

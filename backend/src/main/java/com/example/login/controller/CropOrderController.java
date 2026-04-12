@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/crop-orders")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class CropOrderController {
 
     private final MarketplaceService marketplaceService;
@@ -19,6 +19,11 @@ public class CropOrderController {
     @PutMapping("/{id}/farmer/accept")
     public ResponseEntity<CropOrder> farmerAccept(@PathVariable Long id, @RequestParam Long farmerId) {
         return ResponseEntity.ok(marketplaceService.farmerAcceptCropOrder(id, farmerId));
+    }
+
+    @PutMapping("/{id}/farmer/reject")
+    public ResponseEntity<CropOrder> farmerReject(@PathVariable Long id, @RequestParam Long farmerId) {
+        return ResponseEntity.ok(marketplaceService.farmerRejectCropOrder(id, farmerId));
     }
 
     @PutMapping("/{id}/buyer/accept")

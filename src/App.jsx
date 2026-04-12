@@ -4,9 +4,12 @@ import Register from './Register.jsx'
 import Login from './Login.jsx'
 import Marketplace from './Marketplace.jsx'
 import Sidebar from './Sidebar.jsx'
+import Header from './Header.jsx'
 import Profile from './Profile.jsx'
 import OrdersSection from './OrdersSection.jsx'
 import FertilizerSection from './FertilizerSection.jsx'
+
+import Payment from './Payment.jsx'
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -15,11 +18,12 @@ function App() {
   })
   
   const [activePage, setActivePage] = useState('marketplace')
+  const [paymentData, setPaymentData] = useState(null)
 
   const handleLoginSuccess = (userData) => {
     sessionStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
-    setActivePage('profile')
+    setActivePage('marketplace')
   }
 
   const handleLogout = () => {
@@ -33,6 +37,11 @@ function App() {
     setUser(updatedData)
   }
 
+  const handleStartPayment = (data) => {
+    setPaymentData(data)
+    setActivePage('payment')
+  }
+
   const renderContent = () => {
     if (activePage === 'register') {
       return <Register onBackToLogin={() => setActivePage('login')} />
@@ -42,12 +51,16 @@ function App() {
       return <Login onBackToRegister={() => setActivePage('register')} onLoginSuccess={handleLoginSuccess} />
     }
 
+    if (activePage === 'payment' && paymentData) {
+      return <Payment data={paymentData} onComplete={() => setActivePage('orders')} onCancel={() => setActivePage('orders')} />
+    }
+
     if (user) {
       if (activePage === 'profile') {
         return <Profile user={user} onLogout={handleLogout} onUpdate={handleUpdateUser} />
       }
       if (activePage === 'orders') {
-        return <OrdersSection user={user} />
+        return <OrdersSection user={user} onStartPayment={handleStartPayment} />
       }
       if (activePage === 'fertilizer' && user.role === 'Farmer') {
         return <FertilizerSection user={user} />
@@ -58,15 +71,18 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="bg-background text-on-background min-h-screen flex overflow-hidden w-full">
       <Sidebar 
         activePage={activePage} 
         onNavigate={setActivePage} 
         user={user} 
         onLogout={handleLogout} 
       />
-      <main className="main-content">
-        {renderContent()}
+      <main className="flex-1 overflow-y-auto h-screen relative">
+        <Header activePage={activePage} onNavigate={setActivePage} user={user} />
+        <div className="pt-24 pb-24 px-6 md:px-12 max-w-7xl mx-auto space-y-12">
+          {renderContent()}
+        </div>
       </main>
     </div>
   )

@@ -22,6 +22,8 @@ public class CropVerification {
     @Column(columnDefinition = "TEXT")
     private String feedback;
 
+    private String grade;
+
     @Column(nullable = false)
     private String surveyerName;
 
@@ -54,6 +56,14 @@ public class CropVerification {
         this.status = status;
         this.feedback = feedback;
         this.surveyerName = surveyerName;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     // Getters and Setters
